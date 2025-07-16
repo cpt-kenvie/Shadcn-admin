@@ -291,7 +291,7 @@ export default function Chats() {
                       <span className='sr-only'>Chat Text Box</span>
                       <input
                         type='text'
-                        placeholder='Type your messages...'
+                        placeholder='输入你的消息...'
                         className='h-8 w-full bg-inherit focus-visible:outline-hidden'
                       />
                     </label>

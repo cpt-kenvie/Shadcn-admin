@@ -75,11 +75,11 @@ export function NewChat({ users, onOpenChange, open }: Props) {
           </div>
           <Command className='rounded-lg border'>
             <CommandInput
-              placeholder='Search people...'
+              placeholder='搜索用户...'
               className='text-foreground'
             />
             <CommandList>
-              <CommandEmpty>No people found.</CommandEmpty>
+              <CommandEmpty>没有找到用户。</CommandEmpty>
               <CommandGroup>
                 {users.map((user) => (
                   <CommandItem
@@ -116,7 +116,7 @@ export function NewChat({ users, onOpenChange, open }: Props) {
             onClick={() => showSubmittedData(selectedUsers)}
             disabled={selectedUsers.length === 0}
           >
-            Chat
+            聊天
           </Button>
         </div>
       </DialogContent>

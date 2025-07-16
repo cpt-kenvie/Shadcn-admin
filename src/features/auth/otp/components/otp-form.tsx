@@ -24,7 +24,7 @@ import {
 type OtpFormProps = HTMLAttributes<HTMLFormElement>
 
 const formSchema = z.object({
-  otp: z.string().min(1, { message: 'Please enter your otp code.' }),
+  otp: z.string().min(1, { message: '请输入你的 OTP 代码。' }),
 })
 
 export function OtpForm({ className, ...props }: OtpFormProps) {
@@ -60,7 +60,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
           name='otp'
           render={({ field }) => (
             <FormItem>
-              <FormLabel className='sr-only'>One-Time Password</FormLabel>
+              <FormLabel className='sr-only'>一次性密码</FormLabel>
               <FormControl>
                 <InputOTP
                   maxLength={6}
@@ -88,7 +88,7 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
           )}
         />
         <Button className='mt-2' disabled={otp.length < 6 || isLoading}>
-          Verify
+          验证
         </Button>
       </form>
     </Form>

@@ -19,8 +19,8 @@ type ForgotFormProps = HTMLAttributes<HTMLFormElement>
 const formSchema = z.object({
   email: z
     .string()
-    .min(1, { message: 'Please enter your email' })
-    .email({ message: 'Invalid email address' }),
+    .min(1, { message: '请输入你的邮箱' })
+    .email({ message: '邮箱地址无效' }),
 })
 
 export function ForgotPasswordForm({ className, ...props }: ForgotFormProps) {
@@ -53,16 +53,16 @@ export function ForgotPasswordForm({ className, ...props }: ForgotFormProps) {
           name='email'
           render={({ field }) => (
             <FormItem className='space-y-1'>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>邮箱</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input placeholder='你的邮箱' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button className='mt-2' disabled={isLoading}>
-          Continue
+          下一步
         </Button>
       </form>
     </Form>

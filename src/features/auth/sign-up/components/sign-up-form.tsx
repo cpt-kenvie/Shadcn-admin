@@ -22,20 +22,20 @@ const formSchema = z
   .object({
     email: z
       .string()
-      .min(1, { message: 'Please enter your email' })
-      .email({ message: 'Invalid email address' }),
+      .min(1, { message: '请输入你的邮箱' })
+      .email({ message: '邮箱地址无效' }),
     password: z
       .string()
       .min(1, {
-        message: 'Please enter your password',
+        message: '请输入你的密码',
       })
       .min(7, {
-        message: 'Password must be at least 7 characters long',
+        message: '密码至少需要7个字符',
       }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match.",
+    message: '密码不匹配',
     path: ['confirmPassword'],
   })
 
@@ -73,9 +73,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>邮箱</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input placeholder='你的邮箱' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,7 +86,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           name='password'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>密码</FormLabel>
               <FormControl>
                 <PasswordInput placeholder='********' {...field} />
               </FormControl>
@@ -99,7 +99,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           name='confirmPassword'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel>确认密码</FormLabel>
               <FormControl>
                 <PasswordInput placeholder='********' {...field} />
               </FormControl>
@@ -108,7 +108,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           )}
         />
         <Button className='mt-2' disabled={isLoading}>
-          Create Account
+          创建账号
         </Button>
 
         <div className='relative my-2'>
@@ -117,7 +117,7 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
           </div>
           <div className='relative flex justify-center text-xs uppercase'>
             <span className='bg-background text-muted-foreground px-2'>
-              Or continue with
+              或者继续使用
             </span>
           </div>
         </div>
