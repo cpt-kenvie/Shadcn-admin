@@ -2,7 +2,7 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -16,14 +16,16 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { toast } from 'sonner'
+import http from '@/utils/http'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
 const formSchema = z.object({
-  email: z
+  username: z
     .string()
-    .min(1, { message: '请输入你的邮箱' })
-    .email({ message: '邮箱地址无效' }),
+    .min(1, { message: '请输入你的用户名' }),
+    // .email({ message: '邮箱地址无效' }),
   password: z
     .string()
     .min(1, {
@@ -36,23 +38,36 @@ const formSchema = z.object({
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
-
-    setTimeout(() => {
+    try {
+      const res = await http.post('/auth/login', {
+        username: data.username,
+        password: data.password,
+      })
+      const result = res.data
+      if (result.success && result.data?.token) {
+        localStorage.setItem('token', result.data.token)
+        toast.success(result.data.message || '登录成功')
+        navigate({ to: '/' })
+      } else {
+        toast.error(result.data?.message || result.message || '登录失败')
+      }
+    } catch (e) {
+      // 错误已由拦截器统一处理
+    } finally {
       setIsLoading(false)
-    }, 3000)
+    }
   }
 
   return (
@@ -64,12 +79,12 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       >
         <FormField
           control={form.control}
-          name='email'
+          name='username'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>邮箱</FormLabel>
+              <FormLabel>用户名</FormLabel>
               <FormControl>
-                <Input placeholder='你的邮箱' {...field} />
+                <Input placeholder='你的用户名' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
