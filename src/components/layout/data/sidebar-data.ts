@@ -76,24 +76,6 @@ export const sidebarData: SidebarData = {
           url: '/users',
           icon: IconUsers,
         },
-        {
-          title: '由 Clerk 保护',
-          icon: ClerkLogo,
-          items: [
-            {
-              title: '登录',
-              url: '/clerk/sign-in',
-            },
-            {
-              title: '注册',
-              url: '/clerk/sign-up',
-            },
-            {
-              title: '用户管理',
-              url: '/clerk/user-management',
-            },
-          ],
-        },
       ],
     },
     {
