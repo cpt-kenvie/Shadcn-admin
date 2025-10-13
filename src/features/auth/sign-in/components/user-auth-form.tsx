@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { toast } from 'sonner'
 import http from '@/utils/http'
+import { useAuthStore } from '@/stores/authStore'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
@@ -57,7 +58,20 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       })
       const result = res.data
       if (result.success && result.data?.token) {
-        localStorage.setItem('token', result.data.token)
+        const { token, user_info } = result.data
+        localStorage.setItem('token', token)
+        useAuthStore.getState().auth.setAccessToken(token)
+        useAuthStore.getState().auth.setUser({
+          accountNo: user_info.username,
+          email: '',
+          role: [],
+          exp: 0,
+          username: user_info.username,
+          createdAt: user_info.created_at,
+          lastLogin: user_info.last_login,
+          loginCount: user_info.login_count,
+          status: user_info.status,
+        })
         toast.success(result.data.message || '登录成功')
         navigate({ to: '/' })
       } else {
