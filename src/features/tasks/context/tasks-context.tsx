@@ -1,3 +1,7 @@
+/**
+ * 任务模块上下文：管理当前打开的对话框类型与当前行数据。
+ * 提供 `useTasks` 钩子以在组件间共享与控制任务交互状态。
+ */
 import React, { useState } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Task } from '../data/schema'

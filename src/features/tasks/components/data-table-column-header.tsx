@@ -1,3 +1,7 @@
+/**
+ * 表头组件：提供排序（升/降/取消）与隐藏列的菜单操作。
+ * 与 TanStack Table 的 `Column` 配合，渲染可交互的列标题。
+ */
 import {
   ArrowDownIcon,
   ArrowUpIcon,

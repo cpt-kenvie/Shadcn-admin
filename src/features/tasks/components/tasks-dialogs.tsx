@@ -1,3 +1,7 @@
+/**
+ * 任务相关对话框集合：集中渲染创建/更新抽屉、导入对话框与删除确认。
+ * 由 `useTasks` 上下文驱动当前打开的对话框与当前行数据。
+ */
 import { showSubmittedData } from '@/utils/show-submitted-data'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { useTasks } from '../context/tasks-context'

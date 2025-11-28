@@ -1,3 +1,7 @@
+/**
+ * 任务页面入口：提供页头、主操作按钮、任务表格与相关对话框。
+ * 使用 `TasksProvider` 管理对话框与当前行状态，数据来自静态 `tasks`。
+ */
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'

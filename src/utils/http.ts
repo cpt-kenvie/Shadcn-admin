@@ -15,7 +15,9 @@ http.interceptors.request.use(
     try {
       // 直接从 localStorage 取 token
       token = localStorage.getItem('token') || ''
-    } catch {}
+    } catch (_e) {
+      token = ''
+    }
     if (token) {
       config.headers = config.headers || {}
       config.headers['Authorization'] = `Bearer ${token}`

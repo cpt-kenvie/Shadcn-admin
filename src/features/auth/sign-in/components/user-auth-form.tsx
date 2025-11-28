@@ -77,7 +77,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       } else {
         toast.error(result.data?.message || result.message || '登录失败')
       }
-    } catch (e) {
+    } catch (_e) {
       // 错误已由拦截器统一处理
     } finally {
       setIsLoading(false)

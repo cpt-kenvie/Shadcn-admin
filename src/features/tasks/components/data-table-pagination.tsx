@@ -1,3 +1,7 @@
+/**
+ * 分页组件：控制每页行数、页码跳转、首页/末页与上一页/下一页。
+ * 从 TanStack Table 的 `table` 状态读取并更新分页信息。
+ */
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -26,9 +30,8 @@ export function DataTablePagination<TData>({
       className='flex items-center justify-between overflow-clip px-2'
       style={{ overflowClipMargin: 1 }}
     >
-      <div className='text-muted-foreground hidden flex-1 text-sm sm:block'>
-        {table.getFilteredSelectedRowModel().rows.length} of{' '}
-        {table.getFilteredRowModel().rows.length} row(s) selected.
+     <div className='text-muted-foreground hidden flex-1 text-sm sm:block'>
+        已选择 {table.getFilteredSelectedRowModel().rows.length} / {table.getFilteredRowModel().rows.length} 行。
       </div>
       <div className='flex items-center sm:space-x-6 lg:space-x-8'>
         <div className='flex items-center space-x-2'>
@@ -51,8 +54,8 @@ export function DataTablePagination<TData>({
             </SelectContent>
           </Select>
         </div>
-        <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
-          第 {table.getState().pagination.pageIndex + 1} 页 of{' '}
+     <div className='flex w-[100px] items-center justify-center text-sm font-medium'>
+          第 {table.getState().pagination.pageIndex + 1} 页，共{' '}
           {table.getPageCount()}
         </div>
         <div className='flex items-center space-x-2'>

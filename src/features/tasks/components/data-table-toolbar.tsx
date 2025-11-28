@@ -1,3 +1,7 @@
+/**
+ * 表格工具栏：包含标题搜索、状态/优先级筛选、重置过滤与视图选项。
+ * 与 TanStack Table 的列过滤与视图配置协同工作。
+ */
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -19,7 +23,7 @@ export function DataTableToolbar<TData>({
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
         <Input
-          placeholder='Filter tasks...'
+          placeholder='筛选任务...'
           value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
             table.getColumn('title')?.setFilterValue(event.target.value)

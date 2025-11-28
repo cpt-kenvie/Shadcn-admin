@@ -1,3 +1,7 @@
+/**
+ * 多面过滤组件：为状态/优先级等字段提供多选过滤与搜索能力。
+ * 结合 `Popover` + 命令面板实现快速筛选与清除过滤。
+ */
 import * as React from 'react'
 import { CheckIcon, PlusCircledIcon } from '@radix-ui/react-icons'
 import { Column } from '@tanstack/react-table'

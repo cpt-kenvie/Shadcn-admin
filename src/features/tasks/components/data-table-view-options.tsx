@@ -1,3 +1,7 @@
+/**
+ * 视图设置组件：切换列显示与视图选项，支持多列可见性管理。
+ * 通过下拉菜单勾选控制 `table` 的列可见性状态。
+ */
 import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
 import { MixerHorizontalIcon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
@@ -30,7 +34,7 @@ export function DataTableViewOptions<TData>({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-[150px]'>
-        <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+        <DropdownMenuLabel>切换显示列</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {table
           .getAllColumns()

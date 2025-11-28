@@ -1,3 +1,7 @@
+/**
+ * 导入任务对话框：选择并校验 CSV 文件，模拟展示导入的文件信息。
+ * 使用 `react-hook-form` + `zod` 进行表单与文件类型校验。
+ */
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'

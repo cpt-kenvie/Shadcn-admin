@@ -1,3 +1,7 @@
+/**
+ * 表格容器：集成 TanStack Table 的分页/过滤/排序/可见性等状态与渲染。
+ * 组合工具栏与分页控件，渲染任务数据的交互式表格。
+ */
 import * as React from 'react'
 import {
   ColumnDef,

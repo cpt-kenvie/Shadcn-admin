@@ -1,3 +1,7 @@
+/**
+ * 任务表列定义：配置选择列、ID、标题、状态、优先级与行操作。
+ * 基于 TanStack Table 的 `ColumnDef<Task>`，并使用自定义单元格渲染。
+ */
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'

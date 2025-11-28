@@ -1,3 +1,8 @@
+/**
+ * 任务创建/更新抽屉：包含标题、状态、标签、优先级等字段的表单。
+ * 采用 `react-hook-form` + `zod` 校验，提交后展示模拟结果并重置。
+ */
+
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -53,7 +58,7 @@ export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
   })
 
   const onSubmit = (data: TasksForm) => {
-    // do something with the form data
+    // 对表单数据执行某些操作
     onOpenChange(false)
     form.reset()
     showSubmittedData(data)

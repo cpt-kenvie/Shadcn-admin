@@ -1,3 +1,7 @@
+/**
+ * 行操作菜单：编辑、删除、设置标签等；通过 `useTasks` 控制对话框状态。
+ * 解析行数据为 `Task`，并触发对应的更新或删除流程。
+ */
 import { DotsHorizontalIcon } from '@radix-ui/react-icons'
 import { Row } from '@tanstack/react-table'
 import { IconTrash } from '@tabler/icons-react'
