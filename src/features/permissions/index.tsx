@@ -59,6 +59,7 @@ const RESOURCE_LABELS: Record<string, string> = {
   route: '路由管理',
   dashboard: '仪表盘',
   settings: '系统设置',
+  tasks: '任务管理',
 }
 
 // 操作名称映射
