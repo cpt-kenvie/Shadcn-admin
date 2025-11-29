@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { IconBrandFacebook, IconBrandGithub, IconLoader2 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -127,8 +127,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </FormItem>
           )}
         />
-        <Button className='mt-2' disabled={isLoading}>
-          登录
+        <Button className='mt-2' type='submit' disabled={isLoading} aria-busy={isLoading}>
+          {isLoading && <IconLoader2 className='mr-2 h-4 w-4 animate-spin' />}
+          {isLoading ? '登录中…' : '登录'}
         </Button>
 
         <div className='relative my-2'>
