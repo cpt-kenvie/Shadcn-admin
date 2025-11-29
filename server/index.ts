@@ -15,6 +15,7 @@ import userRoutes from './routes/users.js'
 import roleRoutes from './routes/roles.js'
 import permissionRoutes from './routes/permissions.js'
 import routeRoutes from './routes/routes.js'
+import menuRoutes from './routes/menus.js'
 
 // 验证环境变量
 try {
@@ -50,6 +51,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/roles', roleRoutes)
 app.use('/api/permissions', permissionRoutes)
 app.use('/api/routes', routeRoutes)
+app.use('/api/menus', menuRoutes)
 
 // 404 处理
 app.use((req, res) => {

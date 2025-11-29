@@ -42,19 +42,51 @@ import * as usersApi from '@/api/users'
 import * as rolesApi from '@/api/roles'
 import type { User } from '@/api/users'
 
-const formSchema = z.object({
-  firstName: z.string().min(1, { message: '名字是必填的' }),
-  lastName: z.string().min(1, { message: '姓氏是必填的' }),
-  username: z.string().min(1, { message: '用户名是必填的' }),
-  phoneNumber: z.string().optional(),
-  email: z
-    .string()
-    .email({ message: '邮箱无效' })
-    .optional()
-    .or(z.literal('')),
-  password: z.string().min(8, { message: '密码至少8个字符' }),
-  roleId: z.string().min(1, { message: '角色是必填的' }),
-})
+const formSchema = z
+  .object({
+    firstName: z
+      .string()
+      .min(1, { message: '名字是必填的' })
+      .max(50, { message: '名字不能超过50个字符' }),
+    lastName: z
+      .string()
+      .min(1, { message: '姓氏是必填的' })
+      .max(50, { message: '姓氏不能超过50个字符' }),
+    username: z
+      .string()
+      .min(3, { message: '用户名至少3个字符' })
+      .max(50, { message: '用户名不能超过50个字符' })
+      .regex(/^[a-zA-Z0-9_-]+$/, {
+        message: '用户名只能包含字母、数字、下划线和连字符',
+      }),
+    phoneNumber: z.string().optional(),
+    email: z
+      .string()
+      .email({ message: '邮箱格式无效' })
+      .optional()
+      .or(z.literal('')),
+    password: z.string().optional(),
+    roleId: z.string().min(1, { message: '角色是必填的' }),
+    isEdit: z.boolean().optional(),
+  })
+  .superRefine(({ isEdit, password }, ctx) => {
+    // 新建用户时密码是必填的
+    if (!isEdit && (!password || password.length < 8)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '密码至少8个字符',
+        path: ['password'],
+      })
+    }
+    // 编辑用户时，如果填写了密码，必须至少8个字符
+    if (isEdit && password && password.length > 0 && password.length < 8) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '密码至少8个字符',
+        path: ['password'],
+      })
+    }
+  })
 
 type UserForm = z.infer<typeof formSchema>
 
@@ -96,32 +128,68 @@ export function UsersActionDialog({
       roleId: '',
       phoneNumber: '',
       password: '',
+      isEdit: false,
     },
   })
 
   // 重置表单当打开/关闭对话框时
   useEffect(() => {
-    if (open && !isEdit) {
-      form.reset({
-        firstName: '',
-        lastName: '',
-        username: '',
-        email: '',
-        roleId: '',
-        phoneNumber: '',
-        password: '',
-      })
+    if (open) {
+      if (isEdit && currentRow) {
+        // 编辑模式：回填用户数据
+        form.reset({
+          firstName: currentRow.firstName || '',
+          lastName: currentRow.lastName || '',
+          username: currentRow.username,
+          email: currentRow.email || '',
+          roleId: currentRow.roles?.[0]?.id || '',
+          phoneNumber: currentRow.phoneNumber || '',
+          password: '',
+          isEdit: true,
+        })
+      } else {
+        // 新建模式：清空表单
+        form.reset({
+          firstName: '',
+          lastName: '',
+          username: '',
+          email: '',
+          roleId: '',
+          phoneNumber: '',
+          password: '',
+          isEdit: false,
+        })
+      }
     }
-  }, [open, isEdit, form])
+  }, [open, isEdit, currentRow, form])
 
   const onSubmit = async (values: UserForm) => {
     setIsSubmitting(true)
     try {
-      if (isEdit) {
-        // TODO: 更新用户
+      if (isEdit && currentRow) {
+        // 更新用户
+        const updateData: usersApi.UpdateUserRequest = {
+          email: values.email || undefined,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          phoneNumber: values.phoneNumber || undefined,
+          roleIds: [values.roleId],
+        }
+
+        // 如果填写了新密码，包含在更新数据中
+        if (values.password && values.password.trim().length > 0) {
+          updateData.password = values.password
+        }
+
+        await usersApi.updateUser(currentRow.id, updateData)
         toast.success('用户更新成功')
       } else {
         // 创建用户
+        if (!values.password) {
+          toast.error('创建用户时密码是必填的')
+          return
+        }
+
         await usersApi.createUser({
           username: values.username,
           email: values.email || undefined,
@@ -182,6 +250,7 @@ export function UsersActionDialog({
                       <Input
                         placeholder='john_doe'
                         className='col-span-4'
+                        disabled={isEdit}
                         {...field}
                       />
                     </FormControl>
@@ -300,11 +369,15 @@ export function UsersActionDialog({
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                     <FormLabel className='col-span-2 text-right'>
-                      密码 *
+                      {isEdit ? '新密码' : '密码 *'}
                     </FormLabel>
                     <FormControl>
                       <PasswordInput
-                        placeholder='至少8个字符'
+                        placeholder={
+                          isEdit
+                            ? '留空表示不修改密码'
+                            : '至少8个字符'
+                        }
                         className='col-span-4'
                         {...field}
                       />

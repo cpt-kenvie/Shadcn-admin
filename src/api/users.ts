@@ -44,6 +44,7 @@ export interface UpdateUserRequest {
   phoneNumber?: string
   status?: 'ACTIVE' | 'INACTIVE' | 'INVITED' | 'SUSPENDED'
   roleIds?: string[]
+  password?: string
 }
 
 export interface GetUsersParams {

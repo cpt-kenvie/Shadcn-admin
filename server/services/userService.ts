@@ -33,6 +33,7 @@ export interface UpdateUserRequest {
   phoneNumber?: string
   status?: UserStatus
   roleIds?: string[]
+  password?: string
 }
 
 /**
@@ -178,6 +179,16 @@ export async function createUser(data: CreateUserRequest) {
     throw createValidationError('用户名和密码不能为空')
   }
 
+  // 验证用户名格式
+  if (username.length < 3 || username.length > 50) {
+    throw createValidationError('用户名长度必须在3-50个字符之间')
+  }
+
+  // 验证密码强度
+  if (password.length < 8) {
+    throw createValidationError('密码至少需要8个字符')
+  }
+
   // 验证用户名是否已存在
   const existingUser = await prisma.user.findUnique({
     where: { username },
@@ -198,39 +209,55 @@ export async function createUser(data: CreateUserRequest) {
     }
   }
 
+  // 验证角色是否存在
+  if (roleIds && roleIds.length > 0) {
+    const validRoles = await prisma.role.findMany({
+      where: { id: { in: roleIds } },
+    })
+
+    if (validRoles.length !== roleIds.length) {
+      throw createValidationError('部分角色不存在')
+    }
+  }
+
   // 加密密码
   const passwordHash = await bcrypt.hash(password, 10)
 
   // 创建用户
-  const user = await prisma.user.create({
-    data: {
-      username,
-      email,
-      passwordHash,
-      firstName,
-      lastName,
-      phoneNumber,
-      status: status || UserStatus.ACTIVE,
-      userRoles: roleIds.length > 0 ? {
-        create: roleIds.map((roleId) => ({
-          roleId,
-        })),
-      } : undefined,
-    },
-    include: {
-      userRoles: {
-        include: {
-          role: true,
+  try {
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        passwordHash,
+        firstName,
+        lastName,
+        phoneNumber,
+        status: status || UserStatus.ACTIVE,
+        userRoles: roleIds && roleIds.length > 0 ? {
+          create: roleIds.map((roleId) => ({
+            roleId,
+          })),
+        } : undefined,
+      },
+      include: {
+        userRoles: {
+          include: {
+            role: true,
+          },
         },
       },
-    },
-  })
+    })
 
-  return {
-    ...user,
-    passwordHash: undefined,
-    roles: user.userRoles.map((ur) => ur.role),
-    userRoles: undefined,
+    return {
+      ...user,
+      passwordHash: undefined,
+      roles: user.userRoles.map((ur) => ur.role),
+      userRoles: undefined,
+    }
+  } catch (error) {
+    console.error('创建用户失败:', error)
+    throw createValidationError('创建用户失败，请稍后重试')
   }
 }
 
@@ -242,7 +269,7 @@ export async function createUser(data: CreateUserRequest) {
  * @throws {ApiError} 更新失败时抛出
  */
 export async function updateUser(id: string, data: UpdateUserRequest) {
-  const { email, firstName, lastName, phoneNumber, status, roleIds } = data
+  const { email, firstName, lastName, phoneNumber, status, roleIds, password } = data
 
   // 检查用户是否存在
   const existingUser = await prisma.user.findUnique({
@@ -267,39 +294,65 @@ export async function updateUser(id: string, data: UpdateUserRequest) {
     }
   }
 
+  // 如果提供了新密码，进行加密
+  let passwordHash: string | undefined
+  if (password && password.trim().length > 0) {
+    if (password.length < 8) {
+      throw createValidationError('密码至少需要8个字符')
+    }
+    passwordHash = await bcrypt.hash(password, 10)
+  }
+
+  // 验证角色是否存在
+  if (roleIds && roleIds.length > 0) {
+    const validRoles = await prisma.role.findMany({
+      where: { id: { in: roleIds } },
+    })
+
+    if (validRoles.length !== roleIds.length) {
+      throw createValidationError('部分角色不存在')
+    }
+  }
+
   // 更新用户
-  const user = await prisma.user.update({
-    where: { id },
-    data: {
-      email,
-      firstName,
-      lastName,
-      phoneNumber,
-      status,
-    },
-    include: {
-      userRoles: {
-        include: {
-          role: true,
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        email,
+        firstName,
+        lastName,
+        phoneNumber,
+        status,
+        ...(passwordHash && { passwordHash }),
+      },
+      include: {
+        userRoles: {
+          include: {
+            role: true,
+          },
         },
       },
-    },
-  })
-
-  // 更新角色
-  if (roleIds !== undefined && roleIds.length > 0) {
-    // 删除现有角色
-    await prisma.userRole.deleteMany({
-      where: { userId: id },
     })
 
-    // 添加新角色
-    await prisma.userRole.createMany({
-      data: roleIds.map((roleId) => ({
-        userId: id,
-        roleId,
-      })),
-    })
+    // 更新角色
+    if (roleIds !== undefined && roleIds.length > 0) {
+      // 删除现有角色
+      await prisma.userRole.deleteMany({
+        where: { userId: id },
+      })
+
+      // 添加新角色
+      await prisma.userRole.createMany({
+        data: roleIds.map((roleId) => ({
+          userId: id,
+          roleId,
+        })),
+      })
+    }
+  } catch (error) {
+    console.error('更新用户失败:', error)
+    throw createValidationError('更新用户失败，请稍后重试')
   }
 
   // 重新查询用户以获取更新后的角色
@@ -331,16 +384,49 @@ export async function deleteUser(id: string) {
   // 检查用户是否存在
   const user = await prisma.user.findUnique({
     where: { id },
+    include: {
+      userRoles: {
+        include: {
+          role: true,
+        },
+      },
+    },
   })
 
   if (!user) {
     throw createNotFoundError('用户不存在')
   }
 
+  // 防止删除系统管理员（可选的安全检查）
+  const isSuperAdmin = user.userRoles.some((ur) => ur.role.name === 'superadmin')
+  if (isSuperAdmin) {
+    // 检查是否是最后一个超级管理员
+    const superAdminCount = await prisma.user.count({
+      where: {
+        userRoles: {
+          some: {
+            role: {
+              name: 'superadmin',
+            },
+          },
+        },
+      },
+    })
+
+    if (superAdminCount <= 1) {
+      throw createValidationError('不能删除最后一个超级管理员')
+    }
+  }
+
   // 删除用户（级联删除关联的角色）
-  await prisma.user.delete({
-    where: { id },
-  })
+  try {
+    await prisma.user.delete({
+      where: { id },
+    })
+  } catch (error) {
+    console.error('删除用户失败:', error)
+    throw createValidationError('删除用户失败，请稍后重试')
+  }
 }
 
 /**
@@ -349,11 +435,54 @@ export async function deleteUser(id: string) {
  * @returns {Promise<number>} 删除的用户数量
  */
 export async function deleteUsers(ids: string[]) {
-  const result = await prisma.user.deleteMany({
-    where: {
-      id: { in: ids },
+  if (!ids || ids.length === 0) {
+    throw createValidationError('请选择要删除的用户')
+  }
+
+  // 检查是否试图删除所有超级管理员
+  const users = await prisma.user.findMany({
+    where: { id: { in: ids } },
+    include: {
+      userRoles: {
+        include: {
+          role: true,
+        },
+      },
     },
   })
 
-  return result.count
+  const deletingSuperAdmins = users.filter((user) =>
+    user.userRoles.some((ur) => ur.role.name === 'superadmin')
+  )
+
+  if (deletingSuperAdmins.length > 0) {
+    const totalSuperAdmins = await prisma.user.count({
+      where: {
+        userRoles: {
+          some: {
+            role: {
+              name: 'superadmin',
+            },
+          },
+        },
+      },
+    })
+
+    if (totalSuperAdmins <= deletingSuperAdmins.length) {
+      throw createValidationError('不能删除所有超级管理员')
+    }
+  }
+
+  try {
+    const result = await prisma.user.deleteMany({
+      where: {
+        id: { in: ids },
+      },
+    })
+
+    return result.count
+  } catch (error) {
+    console.error('批量删除用户失败:', error)
+    throw createValidationError('批量删除用户失败，请稍后重试')
+  }
 }
