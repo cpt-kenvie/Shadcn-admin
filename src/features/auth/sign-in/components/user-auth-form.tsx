@@ -17,8 +17,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 import { toast } from 'sonner'
-import http from '@/utils/http'
 import { useAuthStore } from '@/stores/authStore'
+import * as authApi from '@/api/auth'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
@@ -52,33 +52,37 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
     try {
-      const res = await http.post('/auth/login', {
+      // 登录
+      const loginRes = await authApi.login({
         username: data.username,
         password: data.password,
       })
-      const result = res.data
-      if (result.success && result.data?.token) {
-        const { token, user_info } = result.data
+
+      const loginData = loginRes.data
+      if (loginData.success && loginData.data?.token) {
+        const { token } = loginData.data
+
+        // 保存 token
         localStorage.setItem('token', token)
         useAuthStore.getState().auth.setAccessToken(token)
-        useAuthStore.getState().auth.setUser({
-          accountNo: user_info.username,
-          email: '',
-          role: [],
-          exp: 0,
-          username: user_info.username,
-          createdAt: user_info.created_at,
-          lastLogin: user_info.last_login,
-          loginCount: user_info.login_count,
-          status: user_info.status,
-        })
-        toast.success(result.data.message || '登录成功')
-        navigate({ to: '/' })
+
+        // 获取完整的用户信息（包括权限）
+        const userRes = await authApi.getCurrentUser()
+        const userData = userRes.data
+
+        if (userData.success && userData.data) {
+          useAuthStore.getState().auth.setUser(userData.data)
+          toast.success(loginData.data.message || '登录成功')
+          navigate({ to: '/' })
+        } else {
+          toast.error('获取用户信息失败')
+        }
       } else {
-        toast.error(result.data?.message || result.message || '登录失败')
+        toast.error(loginData.message || '登录失败')
       }
-    } catch (_e) {
-      // 错误已由拦截器统一处理
+    } catch (error: any) {
+      // 错误已由拦截器统一处理，这里只需要更新状态
+      console.error('登录失败:', error)
     } finally {
       setIsLoading(false)
     }

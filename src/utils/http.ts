@@ -32,7 +32,27 @@ http.interceptors.request.use(
 // 响应拦截器：统一错误处理
 http.interceptors.response.use(
   (response) => {
-    // 业务错误可在此处理
+    // 统一处理响应数据
+    const data = response.data
+
+    // 如果是标准 API 响应格式
+    if (data && typeof data === 'object' && 'success' in data) {
+      // 成功响应
+      if (data.success) {
+        return response
+      }
+
+      // 业务错误
+      const errorMessage = data.message || '请求失败'
+      handleServerError({
+        response: {
+          status: response.status,
+          data: { message: errorMessage }
+        }
+      })
+      return Promise.reject(new Error(errorMessage))
+    }
+
     return response
   },
   (error) => {
