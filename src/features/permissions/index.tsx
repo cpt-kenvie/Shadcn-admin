@@ -4,6 +4,7 @@
  * 依赖项：@tanstack/react-query, @/api/permissions
  */
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -12,6 +13,15 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { PermissionGuard } from '@/components/permission-guard'
+import {
+  IconPlus,
+  IconFolderPlus,
+  IconEdit,
+  IconTrash,
+  IconInfoCircle,
+} from '@tabler/icons-react'
 import {
   Table,
   TableBody,
@@ -20,7 +30,26 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { toast } from 'sonner'
 import * as permissionsApi from '@/api/permissions'
+import { PermissionDialog } from './components/permission-dialog'
+import { BatchCreateDialog } from './components/batch-create-dialog'
 
 // 资源名称映射
 const RESOURCE_LABELS: Record<string, string> = {
@@ -67,8 +96,15 @@ const getActionBadgeVariant = (action: string): 'default' | 'secondary' | 'destr
 }
 
 export default function Permissions() {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [batchDialogOpen, setBatchDialogOpen] = useState(false)
+  const [selectedPermission, setSelectedPermission] = useState<any>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [permissionToDelete, setPermissionToDelete] = useState<any>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   // 获取权限列表
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['permissions'],
     queryFn: async () => {
       const response = await permissionsApi.getAllPermissions()
@@ -87,6 +123,39 @@ export default function Permissions() {
     return acc
   }, {} as Record<string, any[]>)
 
+  const handleCreate = () => {
+    setSelectedPermission(null)
+    setDialogOpen(true)
+  }
+
+  const handleEdit = (permission: any) => {
+    setSelectedPermission(permission)
+    setDialogOpen(true)
+  }
+
+  const handleDeleteClick = (permission: any) => {
+    setPermissionToDelete(permission)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!permissionToDelete) return
+
+    setIsDeleting(true)
+    try {
+      await permissionsApi.deletePermission(permissionToDelete.id)
+      toast.success('权限删除成功')
+      refetch()
+      setDeleteDialogOpen(false)
+      setPermissionToDelete(null)
+    } catch (error: any) {
+      const message = error.response?.data?.message || '删除失败，请重试'
+      toast.error(message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <>
       <Header fixed>
@@ -102,8 +171,22 @@ export default function Permissions() {
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>权限管理</h2>
             <p className='text-muted-foreground'>
-              查看系统所有权限配置。共 {permissions.length} 个权限
+              管理系统权限配置。共 {permissions.length} 个权限
             </p>
+          </div>
+          <div className='flex gap-2'>
+            <PermissionGuard action='CREATE' resource='permission'>
+              <Button onClick={handleCreate} variant='outline' className='space-x-1'>
+                <IconPlus size={18} />
+                <span>创建权限</span>
+              </Button>
+            </PermissionGuard>
+            <PermissionGuard action='CREATE' resource='permission'>
+              <Button onClick={() => setBatchDialogOpen(true)} className='space-x-1'>
+                <IconFolderPlus size={18} />
+                <span>批量创建</span>
+              </Button>
+            </PermissionGuard>
           </div>
         </div>
 
@@ -136,6 +219,7 @@ export default function Permissions() {
                         <TableHead>权限标识</TableHead>
                         <TableHead>描述</TableHead>
                         <TableHead>创建时间</TableHead>
+                        <TableHead className='text-right'>操作</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -152,14 +236,54 @@ export default function Permissions() {
                             </code>
                           </TableCell>
                           <TableCell>
-                            <span className='text-muted-foreground'>
-                              {permission.description || '-'}
-                            </span>
+                            <div className='flex items-center gap-2'>
+                              <span className='text-muted-foreground'>
+                                {permission.description || '-'}
+                              </span>
+                              {permission.conditions && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <IconInfoCircle
+                                        size={14}
+                                        className='text-muted-foreground'
+                                      />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>包含条件限制</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <span className='text-sm text-muted-foreground'>
                               {new Date(permission.createdAt).toLocaleDateString('zh-CN')}
                             </span>
+                          </TableCell>
+                          <TableCell className='text-right'>
+                            <div className='flex justify-end gap-2'>
+                              <PermissionGuard action='UPDATE' resource='permission'>
+                                <Button
+                                  variant='ghost'
+                                  size='sm'
+                                  onClick={() => handleEdit(permission)}
+                                >
+                                  <IconEdit size={16} />
+                                </Button>
+                              </PermissionGuard>
+                              <PermissionGuard action='DELETE' resource='permission'>
+                                <Button
+                                  variant='ghost'
+                                  size='sm'
+                                  onClick={() => handleDeleteClick(permission)}
+                                  className='text-destructive hover:bg-destructive/10'
+                                >
+                                  <IconTrash size={16} />
+                                </Button>
+                              </PermissionGuard>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -177,6 +301,46 @@ export default function Permissions() {
           </div>
         )}
       </Main>
+
+      <PermissionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        permission={selectedPermission}
+        onSuccess={refetch}
+      />
+
+      <BatchCreateDialog
+        open={batchDialogOpen}
+        onOpenChange={setBatchDialogOpen}
+        onSuccess={refetch}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除权限</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要删除权限{' '}
+              <strong>
+                {permissionToDelete?.resource}:{permissionToDelete?.action}
+              </strong>{' '}
+              吗？
+              <br />
+              此操作无法撤销，如果权限正在使用中将无法删除。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+            >
+              {isDeleting ? '删除中...' : '确认删除'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
