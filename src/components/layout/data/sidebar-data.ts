@@ -100,7 +100,7 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
-          title: '路由管理',
+          title: '菜单管理',
           url: '/routes',
           icon: IconRoute,
         },

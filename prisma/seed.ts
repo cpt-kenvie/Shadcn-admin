@@ -45,7 +45,7 @@ async function main() {
  * @returns {Promise<Permission[]>} 创建的权限列表
  */
 async function createPermissions() {
-  const resources = ['user', 'role', 'permission', 'dashboard', 'settings']
+  const resources = ['user', 'role', 'permission', 'route', 'dashboard', 'settings']
   const actions: PermissionAction[] = [
     'CREATE',
     'READ',

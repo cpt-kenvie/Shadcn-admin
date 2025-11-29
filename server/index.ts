@@ -13,6 +13,8 @@ import { disconnectDatabase } from './config/database.js'
 import authRoutes from './routes/auth.js'
 import userRoutes from './routes/users.js'
 import roleRoutes from './routes/roles.js'
+import permissionRoutes from './routes/permissions.js'
+import routeRoutes from './routes/routes.js'
 
 // 验证环境变量
 try {
@@ -46,6 +48,8 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/roles', roleRoutes)
+app.use('/api/permissions', permissionRoutes)
+app.use('/api/routes', routeRoutes)
 
 // 404 处理
 app.use((req, res) => {
