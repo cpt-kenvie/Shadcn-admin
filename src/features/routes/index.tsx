@@ -12,9 +12,10 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Button } from '@/components/ui/button'
-import { IconPlus, IconTrash, IconEdit, IconEye, IconEyeOff } from '@tabler/icons-react'
+import { IconPlus, IconTrash, IconEdit, IconEye, IconEyeOff, IconCornerDownRight } from '@tabler/icons-react'
 import { Badge } from '@/components/ui/badge'
 import { PermissionGuard } from '@/components/permission-guard'
+import { ICON_MAP } from '@/components/layout/data/icon-map'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,12 +49,21 @@ export default function Routes() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['routes'],
     queryFn: async () => {
-      const response = await routesApi.getAllRoutesFlat()
+      const response = await routesApi.getAllRoutes()
       return response.data
     },
   })
 
-  const routes = data?.data || []
+  // 扁平化路由树以便在表格中展示
+  const flattenRoutes = (routes: any[], depth = 0, parent: any = null): any[] => {
+    return routes.reduce((acc, route) => {
+      const current = { ...route, depth, parent }
+      const children = route.children ? flattenRoutes(route.children, depth + 1, current) : []
+      return [...acc, current, ...children]
+    }, [])
+  }
+
+  const routes = data?.data ? flattenRoutes(data.data) : []
 
   const handleEdit = (route: any) => {
     setSelectedRoute(route)
@@ -148,7 +158,14 @@ export default function Routes() {
                 ) : (
                   routes.map((route: any) => (
                     <TableRow key={route.id}>
-                      <TableCell className='font-medium'>{route.title}</TableCell>
+                      <TableCell className='font-medium'>
+                        <div className='flex items-center' style={{ paddingLeft: `${route.depth * 1.5}rem` }}>
+                          {route.depth > 0 && (
+                            <IconCornerDownRight size={16} className='mr-2 text-muted-foreground' />
+                          )}
+                          {route.title}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <code className='rounded bg-muted px-2 py-1 text-sm'>
                           {route.path}
@@ -163,11 +180,16 @@ export default function Routes() {
                         {route.parent ? (
                           <Badge variant='outline'>{route.parent.title}</Badge>
                         ) : (
-                          <span className='text-muted-foreground'>-</span>
+                          <Badge variant='secondary'>顶级路由</Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        {route.icon ? (
+                        {route.icon && ICON_MAP[route.icon] ? (
+                          (() => {
+                            const Icon = ICON_MAP[route.icon]
+                            return <Icon className='size-5' />
+                          })()
+                        ) : route.icon ? (
                           <span className='text-lg'>{route.icon}</span>
                         ) : (
                           <span className='text-muted-foreground'>-</span>

@@ -42,6 +42,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { IconPicker } from '@/components/icon-picker'
 
 // 资源名称映射
 const RESOURCE_LABELS: Record<string, string> = {
@@ -372,7 +373,10 @@ export function RouteDialog({ open, onOpenChange, route, onSuccess }: RouteDialo
                       <FormItem>
                         <FormLabel>图标</FormLabel>
                         <FormControl>
-                          <Input placeholder='例如：👥' {...field} />
+                          <IconPicker
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
                         </FormControl>
                         <FormDescription>显示在菜单中的图标</FormDescription>
                         <FormMessage />

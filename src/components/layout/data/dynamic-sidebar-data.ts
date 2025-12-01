@@ -4,50 +4,10 @@
  * 依赖项：@/api/menus, @tabler/icons-react
  */
 
-import {
-  IconLayoutDashboard,
-  IconUsers,
-  IconShield,
-  IconKey,
-  IconRoute,
-  IconSettings,
-  IconChecklist,
-  IconPackages,
-  IconMessages,
-  IconUserCog,
-  IconTool,
-  IconPalette,
-  IconNotification,
-  IconBrowserCheck,
-  IconHelp,
-  IconLockAccess,
-  IconBug,
-  IconFolder,
-} from '@tabler/icons-react'
+import { IconLayoutDashboard } from '@tabler/icons-react'
 import type { MenuItem } from '@/api/menus'
 import type { NavGroup, NavItem } from '../types'
-
-// 图标映射 - 将字符串图标名映射到实际的图标组件
-const ICON_MAP: Record<string, React.ElementType> = {
-  'IconLayoutDashboard': IconLayoutDashboard,
-  'IconUsers': IconUsers,
-  'IconShield': IconShield,
-  'IconKey': IconKey,
-  'IconRoute': IconRoute,
-  'IconSettings': IconSettings,
-  'IconChecklist': IconChecklist,
-  'IconPackages': IconPackages,
-  'IconMessages': IconMessages,
-  'IconUserCog': IconUserCog,
-  'IconTool': IconTool,
-  'IconPalette': IconPalette,
-  'IconNotification': IconNotification,
-  'IconBrowserCheck': IconBrowserCheck,
-  'IconHelp': IconHelp,
-  'IconLockAccess': IconLockAccess,
-  'IconBug': IconBug,
-  'IconFolder': IconFolder,
-}
+import { ICON_MAP } from './icon-map'
 
 /**
  * @description 获取图标组件
