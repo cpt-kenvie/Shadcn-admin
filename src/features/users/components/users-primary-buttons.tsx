@@ -7,7 +7,7 @@ interface UsersPrimaryButtonsProps {
   onRefresh?: () => void
 }
 
-export function UsersPrimaryButtons({ onRefresh }: UsersPrimaryButtonsProps) {
+export function UsersPrimaryButtons({}: UsersPrimaryButtonsProps) {
   const { setOpen } = useUsers()
 
   return (

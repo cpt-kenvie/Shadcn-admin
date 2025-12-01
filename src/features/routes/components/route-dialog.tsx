@@ -37,7 +37,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -94,6 +93,18 @@ interface RouteDialogProps {
   onSuccess?: () => void
 }
 
+interface PermissionAction {
+  action: string
+  label: string
+  permissionId: string
+}
+
+interface PermissionGroup {
+  resource: string
+  label: string
+  actions: PermissionAction[]
+}
+
 export function RouteDialog({ open, onOpenChange, route, onSuccess }: RouteDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isEdit = !!route
@@ -142,7 +153,7 @@ export function RouteDialog({ open, onOpenChange, route, onSuccess }: RouteDialo
       })
     }
     return groups
-  }, [] as any[])
+  }, [] as PermissionGroup[])
 
   const form = useForm<RouteForm>({
     resolver: zodResolver(formSchema),
@@ -477,7 +488,7 @@ export function RouteDialog({ open, onOpenChange, route, onSuccess }: RouteDialo
                                 </div>
                                 <div className='ml-6 grid grid-cols-3 gap-2'>
                                   {group.actions.map((action) => {
-                                    const permissionId = `${group.resource}:${action.action}}`
+                                    const permissionId = `${group.resource}:${action.action}`
                                     return (
                                       <div key={permissionId} className='flex items-center space-x-2'>
                                         <Checkbox

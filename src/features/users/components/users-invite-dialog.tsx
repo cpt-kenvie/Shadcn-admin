@@ -39,9 +39,10 @@ type UserInviteForm = z.infer<typeof formSchema>
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess?: () => void
 }
 
-export function UsersInviteDialog({ open, onOpenChange }: Props) {
+export function UsersInviteDialog({ open, onOpenChange, onSuccess }: Props) {
   const form = useForm<UserInviteForm>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: '', role: '', desc: '' },
@@ -51,6 +52,7 @@ export function UsersInviteDialog({ open, onOpenChange }: Props) {
     form.reset()
     showSubmittedData(values)
     onOpenChange(false)
+    onSuccess?.()
   }
 
   return (

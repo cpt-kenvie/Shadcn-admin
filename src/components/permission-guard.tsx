@@ -8,7 +8,7 @@ import { ReactNode } from 'react'
 import { usePermission } from '@/hooks/use-permission'
 
 type Action = 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'MANAGE' | 'IMPORT' | 'EXPORT'
-type Resource = 'user' | 'role' | 'permission' | 'dashboard' | 'settings'
+type Resource = 'user' | 'role' | 'permission' | 'dashboard' | 'settings' | 'route'
 
 interface PermissionGuardProps {
   action: Action

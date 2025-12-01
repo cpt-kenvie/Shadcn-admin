@@ -7,7 +7,7 @@
 import { useAuth } from '@/stores/authStore'
 
 type Action = 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'MANAGE' | 'IMPORT' | 'EXPORT'
-type Resource = 'user' | 'role' | 'permission' | 'dashboard' | 'settings'
+type Resource = 'user' | 'role' | 'permission' | 'dashboard' | 'settings' | 'route'
 
 /**
  * @description 权限检查 Hook

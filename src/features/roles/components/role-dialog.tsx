@@ -80,6 +80,18 @@ interface RoleDialogProps {
   onSuccess?: () => void
 }
 
+interface PermissionAction {
+  action: string
+  label: string
+  permissionId: string
+}
+
+interface PermissionGroup {
+  resource: string
+  label: string
+  actions: PermissionAction[]
+}
+
 export function RoleDialog({ open, onOpenChange, role, onSuccess }: RoleDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isEdit = !!role
@@ -117,7 +129,7 @@ export function RoleDialog({ open, onOpenChange, role, onSuccess }: RoleDialogPr
       })
     }
     return groups
-  }, [] as any[])
+  }, [] as PermissionGroup[])
 
   const form = useForm<RoleForm>({
     resolver: zodResolver(formSchema),

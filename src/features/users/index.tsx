@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -13,7 +13,7 @@ import UsersProvider from './context/users-context'
 import * as usersApi from '@/api/users'
 
 export default function Users() {
-  const [page, setPage] = useState(1)
+  const [page] = useState(1)
   const [pageSize] = useState(20)
 
   // 从 API 获取用户列表

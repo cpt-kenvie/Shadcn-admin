@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { User } from '../data/schema'
+import { User } from '@/api/users'
 import { DataTablePagination } from './data-table-pagination'
 import { DataTableToolbar } from './data-table-toolbar'
 
