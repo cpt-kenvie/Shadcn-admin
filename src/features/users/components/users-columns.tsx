@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import LongText from '@/components/long-text'
-import { callTypes, userTypes } from '../data/data'
+import { callTypes } from '../data/data'
 import { User } from '@/api/users'
 import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
@@ -113,24 +113,28 @@ export const columns: ColumnDef<User>[] = [
       <DataTableColumnHeader column={column} title='角色' />
     ),
     cell: ({ row }) => {
-      const { role } = row.original
-      const userType = userTypes.find(({ value }) => value === role || value === role?.toLowerCase())
+      const { roles } = row.original
 
-      if (!userType) {
-        return null
+      // 如果用户有多个角色，显示第一个角色，或者显示所有角色
+      if (!roles || roles.length === 0) {
+        return <span className='text-sm text-muted-foreground'>无角色</span>
       }
 
       return (
         <div className='flex items-center gap-x-2'>
-          {userType.icon && (
-            <userType.icon size={16} className='text-muted-foreground' />
+          <span className='text-sm'>{roles[0].displayName}</span>
+          {roles.length > 1 && (
+            <Badge variant='secondary' className='text-xs'>
+              +{roles.length - 1}
+            </Badge>
           )}
-          <span className='text-sm capitalize'>{row.getValue('role')}</span>
         </div>
       )
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      // 根据角色 name 字段进行筛选
+      const userRoles = row.original.roles || []
+      return userRoles.some(role => value.includes(role.name))
     },
     enableSorting: false,
     enableHiding: false,

@@ -1,19 +1,52 @@
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
+import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { userTypes } from '../data/data'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
 import { DataTableViewOptions } from './data-table-view-options'
+import * as rolesApi from '@/api/roles'
+import { IconShield } from '@tabler/icons-react'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
 }
 
+/**
+ * @description 用户列表工具栏组件
+ * @param {Table} table - React Table 实例
+ * @returns {JSX.Element} 工具栏组件
+ */
 export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
+
+  // 从 API 动态获取角色列表
+  const { data: rolesData } = useQuery({
+    queryKey: ['roles'],
+    queryFn: async () => {
+      const response = await rolesApi.getAllRoles()
+      return response.data
+    },
+  })
+
+  const roles = rolesData?.data || []
+
+  // 根据实际 API 返回的状态枚举创建状态选项
+  const statusOptions = [
+    { label: '活跃', value: 'ACTIVE' },
+    { label: '不活跃', value: 'INACTIVE' },
+    { label: '邀请', value: 'INVITED' },
+    { label: '暂停', value: 'SUSPENDED' },
+  ]
+
+  // 将角色数据转换为筛选器选项格式
+  const roleOptions = roles.map((role) => ({
+    label: role.displayName,
+    value: role.name,
+    icon: IconShield,
+  }))
 
   return (
     <div className='flex items-center justify-between'>
@@ -33,19 +66,14 @@ export function DataTableToolbar<TData>({
             <DataTableFacetedFilter
               column={table.getColumn('status')}
               title='状态'
-              options={[
-                { label: '活跃', value: 'active' },
-                { label: '不活跃', value: 'inactive' },
-                { label: '邀请', value: 'invited' },
-                { label: '暂停', value: 'suspended' },
-              ]}
+              options={statusOptions}
             />
           )}
-          {table.getColumn('role') && (
+          {table.getColumn('role') && roleOptions.length > 0 && (
             <DataTableFacetedFilter
               column={table.getColumn('role')}
               title='角色'
-              options={userTypes.map((t) => ({ ...t }))}
+              options={roleOptions}
             />
           )}
         </div>
