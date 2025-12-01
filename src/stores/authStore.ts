@@ -4,15 +4,26 @@ import { create } from 'zustand'
 const ACCESS_TOKEN = 'thisisjustarandomstring'
 
 interface AuthUser {
-  accountNo: string
-  email: string
-  role: string[]
-  exp: number
-  username?: string
-  createdAt?: string
-  lastLogin?: string
-  loginCount?: number
-  status?: string
+  id: string
+  username: string
+  email: string | null
+  firstName?: string | null
+  lastName?: string | null
+  phoneNumber?: string | null
+  status: string
+  lastLogin: string | null
+  loginCount: number
+  createdAt: string
+  updatedAt: string
+  roles: Array<{
+    id: string
+    name: string
+    displayName: string
+  }>
+  permissions: Array<{
+    resource: string
+    action: string
+  }>
 }
 
 interface AuthState {
@@ -29,11 +40,30 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set) => {
   const cookieState = Cookies.get(ACCESS_TOKEN)
   const initToken = cookieState ? JSON.parse(cookieState) : ''
+
+  // 尝试从 localStorage 恢复用户信息
+  let initUser = null
+  try {
+    const userStr = localStorage.getItem('user')
+    if (userStr) {
+      initUser = JSON.parse(userStr)
+    }
+  } catch (e) {
+    // 忽略解析错误
+  }
+
   return {
     auth: {
-      user: null,
-      setUser: (user) =>
-        set((state) => ({ ...state, auth: { ...state.auth, user } })),
+      user: initUser,
+      setUser: (user) => {
+        // 保存用户信息到 localStorage
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user))
+        } else {
+          localStorage.removeItem('user')
+        }
+        set((state) => ({ ...state, auth: { ...state.auth, user } }))
+      },
       accessToken: initToken,
       setAccessToken: (accessToken) =>
         set((state) => {
@@ -48,6 +78,8 @@ export const useAuthStore = create<AuthState>()((set) => {
       reset: () =>
         set((state) => {
           Cookies.remove(ACCESS_TOKEN)
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
           return {
             ...state,
             auth: { ...state.auth, user: null, accessToken: '' },
@@ -57,4 +89,4 @@ export const useAuthStore = create<AuthState>()((set) => {
   }
 })
 
-// export const useAuth = () => useAuthStore((state) => state.auth)
+export const useAuth = () => useAuthStore((state) => state.auth)

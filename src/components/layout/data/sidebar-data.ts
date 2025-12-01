@@ -18,6 +18,9 @@ import {
   IconUserCog,
   IconUserOff,
   IconUsers,
+  IconShield,
+  IconKey,
+  IconRoute,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -70,10 +73,36 @@ export const sidebarData: SidebarData = {
           badge: '3',
           icon: IconMessages,
         },
+      ],
+    },
+    {
+      title: '系统管理',
+      items: [
         {
-          title: '用户',
-          url: '/users',
+          title: '用户管理',
           icon: IconUsers,
+          items: [
+            {
+              title: '用户列表',
+              url: '/users',
+              icon: IconUsers,
+            },
+            {
+              title: '角色管理',
+              url: '/roles',
+              icon: IconShield,
+            },
+            {
+              title: '权限管理',
+              url: '/permissions',
+              icon: IconKey,
+            },
+          ],
+        },
+        {
+          title: '菜单管理',
+          url: '/routes',
+          icon: IconRoute,
         },
       ],
     },

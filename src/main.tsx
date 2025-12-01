@@ -75,6 +75,13 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 })
 
+// 启动时检查令牌；若未检测到令牌，则跳转到登录页并携带当前地址作为重定向参数
+const accessToken = useAuthStore.getState().auth.accessToken
+if (!accessToken && !router.history.location.href.includes('/sign-in')) {
+  const redirect = `${router.history.location.href}`
+  router.navigate({ to: '/sign-in', search: { redirect } })
+}
+
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
   interface Register {

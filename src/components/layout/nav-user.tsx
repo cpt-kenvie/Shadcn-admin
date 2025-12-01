@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import {
   BadgeCheck,
   Bell,
@@ -23,17 +23,35 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { useAuthStore } from '@/stores/authStore'
+import * as authApi from '@/api/auth'
+import { toast } from 'sonner'
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
+    name?: string
+    email?: string
+    avatar?: string
   }
 }) {
   const { isMobile } = useSidebar()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout()
+      useAuthStore.getState().auth.reset()
+      toast.success('已退出登录')
+      navigate({ to: '/sign-in' })
+    } catch (error) {
+      console.error('退出登录失败:', error)
+      // 即使API失败，也清除本地状态
+      useAuthStore.getState().auth.reset()
+      navigate({ to: '/sign-in' })
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -102,7 +120,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               退出登录
             </DropdownMenuItem>
