@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useUsers } from '../context/users-context'
 import { User } from '@/api/users'
+import { usePermission } from '@/hooks/use-permission'
 
 interface DataTableRowActionsProps {
   row: Row<User>
@@ -19,6 +20,17 @@ interface DataTableRowActionsProps {
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const { setOpen, setCurrentRow } = useUsers()
+  const { hasPermission } = usePermission()
+
+  // 检查用户权限
+  const canUpdate = hasPermission('UPDATE', 'user')
+  const canDelete = hasPermission('DELETE', 'user')
+
+  // 如果既没有编辑权限也没有删除权限，不显示操作按钮
+  if (!canUpdate && !canDelete) {
+    return null
+  }
+
   return (
     <>
       <DropdownMenu modal={false}>
@@ -32,30 +44,34 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end' className='w-[160px]'>
-          <DropdownMenuItem
-            onClick={() => {
-              setCurrentRow(row.original)
-              setOpen('edit')
-            }}
-          >
-            编辑
-            <DropdownMenuShortcut>
-              <IconEdit size={16} />
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setCurrentRow(row.original)
-              setOpen('delete')
-            }}
-            className='text-red-500!'
-          >
-            删除
-            <DropdownMenuShortcut>
-              <IconTrash size={16} />
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
+          {canUpdate && (
+            <DropdownMenuItem
+              onClick={() => {
+                setCurrentRow(row.original)
+                setOpen('edit')
+              }}
+            >
+              编辑
+              <DropdownMenuShortcut>
+                <IconEdit size={16} />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+          )}
+          {canUpdate && canDelete && <DropdownMenuSeparator />}
+          {canDelete && (
+            <DropdownMenuItem
+              onClick={() => {
+                setCurrentRow(row.original)
+                setOpen('delete')
+              }}
+              className='text-red-500!'
+            >
+              删除
+              <DropdownMenuShortcut>
+                <IconTrash size={16} />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

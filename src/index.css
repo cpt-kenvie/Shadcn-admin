@@ -181,3 +181,48 @@
     height: 0;
   }
 }
+
+/* Toast 关闭按钮样式优化 */
+@layer components {
+  /* Toast 容器调整，为右侧关闭按钮留出空间 */
+  [data-sonner-toast] {
+    padding-right: 40px !important;
+  }
+
+  /* 关闭按钮：去掉圆形背景，只显示叉号 */
+  [data-sonner-toast] button[data-close-button] {
+    position: absolute !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 4px !important;
+    width: auto !important;
+    height: auto !important;
+    left: auto !important;
+    opacity: 0.7 !important;
+  }
+
+  /* 关闭按钮图标样式 - 放大叉号 */
+  [data-sonner-toast] button[data-close-button] svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  /* 关闭按钮悬停效果 - 只改变透明度 */
+  [data-sonner-toast] button[data-close-button]:hover {
+    background: transparent !important;
+    opacity: 1 !important;
+    transform: translateY(-50%) scale(1.15) !important;
+    transition: all 0.2s ease;
+  }
+
+  /* 关闭按钮焦点样式 */
+  [data-sonner-toast] button[data-close-button]:focus-visible {
+    opacity: 1 !important;
+    outline: 2px solid var(--ring) !important;
+    outline-offset: 2px !important;
+  }
+}

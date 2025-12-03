@@ -1,3 +1,9 @@
+/**
+ * 模块功能：根路由配置
+ * 最后修改：2025-12-03
+ * 依赖项：@tanstack/react-router, @tanstack/react-query
+ */
+
 import { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -15,7 +21,7 @@ export const Route = createRootRouteWithContext<{
       <>
         <NavigationProgress />
         <Outlet />
-        <Toaster duration={50000} />
+        <Toaster duration={4000} />
         {import.meta.env.MODE === 'development' && (
           <>
             <ReactQueryDevtools buttonPosition='bottom-left' />
