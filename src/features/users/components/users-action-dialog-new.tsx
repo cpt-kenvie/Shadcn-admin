@@ -44,14 +44,15 @@ import type { User } from '@/api/users'
 
 const formSchema = z
   .object({
-    firstName: z
+    nickname: z
       .string()
-      .min(1, { message: '名字是必填的' })
-      .max(50, { message: '名字不能超过50个字符' }),
-    lastName: z
+      .min(1, { message: '昵称是必填的' })
+      .max(100, { message: '昵称不能超过100个字符' }),
+    avatar: z
       .string()
-      .min(1, { message: '姓氏是必填的' })
-      .max(50, { message: '姓氏不能超过50个字符' }),
+      .url({ message: '头像地址格式无效' })
+      .optional()
+      .or(z.literal('')),
     username: z
       .string()
       .min(3, { message: '用户名至少3个字符' })
@@ -121,8 +122,8 @@ export function UsersActionDialog({
   const form = useForm<UserForm>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      nickname: '',
+      avatar: '',
       username: '',
       email: '',
       roleId: '',
@@ -138,8 +139,8 @@ export function UsersActionDialog({
       if (isEdit && currentRow) {
         // 编辑模式：回填用户数据
         form.reset({
-          firstName: currentRow.firstName || '',
-          lastName: currentRow.lastName || '',
+          nickname: currentRow.nickname || '',
+          avatar: currentRow.avatar || '',
           username: currentRow.username,
           email: currentRow.email || '',
           roleId: currentRow.roles?.[0]?.id || '',
@@ -150,8 +151,8 @@ export function UsersActionDialog({
       } else {
         // 新建模式：清空表单
         form.reset({
-          firstName: '',
-          lastName: '',
+          nickname: '',
+          avatar: '',
           username: '',
           email: '',
           roleId: '',
@@ -170,8 +171,8 @@ export function UsersActionDialog({
         // 更新用户
         const updateData: usersApi.UpdateUserRequest = {
           email: values.email || undefined,
-          firstName: values.firstName,
-          lastName: values.lastName,
+          nickname: values.nickname,
+          avatar: values.avatar || undefined,
           phoneNumber: values.phoneNumber || undefined,
           roleIds: [values.roleId],
         }
@@ -194,8 +195,8 @@ export function UsersActionDialog({
           username: values.username,
           email: values.email || undefined,
           password: values.password,
-          firstName: values.firstName,
-          lastName: values.lastName,
+          nickname: values.nickname,
+          avatar: values.avatar || undefined,
           phoneNumber: values.phoneNumber || undefined,
           roleIds: [values.roleId],
         })
@@ -260,15 +261,15 @@ export function UsersActionDialog({
               />
               <FormField
                 control={form.control}
-                name='firstName'
+                name='nickname'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                     <FormLabel className='col-span-2 text-right'>
-                      名字 *
+                      昵称 *
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='John'
+                        placeholder='张三'
                         className='col-span-4'
                         {...field}
                       />
@@ -279,15 +280,15 @@ export function UsersActionDialog({
               />
               <FormField
                 control={form.control}
-                name='lastName'
+                name='avatar'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
                     <FormLabel className='col-span-2 text-right'>
-                      姓氏 *
+                      头像地址
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='Doe'
+                        placeholder='https://example.com/avatar.jpg'
                         className='col-span-4'
                         {...field}
                       />

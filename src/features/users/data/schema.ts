@@ -17,8 +17,8 @@ const userRoleSchema = z.union([
 
 const userSchema = z.object({
   id: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
+  nickname: z.string().nullable(),
+  avatar: z.string().nullable(),
   username: z.string(),
   email: z.string(),
   phoneNumber: z.string(),

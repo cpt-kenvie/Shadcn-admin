@@ -6,8 +6,15 @@
 
 import { PrismaClient, PermissionAction, UserStatus } from '@prisma/client'
 import * as bcrypt from 'bcryptjs'
+import 'dotenv/config'
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+})
 
 /**
  * @description 主种子函数，初始化所有基础数据
@@ -196,8 +203,7 @@ async function createUsers(adminARoleId: string, adminBRoleId: string) {
       username: 'admin_a',
       email: 'admin_a@example.com',
       passwordHash,
-      firstName: 'Admin',
-      lastName: 'A',
+      nickname: '管理员A',
       phoneNumber: '+86 138-0000-0001',
       status: UserStatus.ACTIVE,
     },
@@ -225,8 +231,7 @@ async function createUsers(adminARoleId: string, adminBRoleId: string) {
       username: 'admin_b',
       email: 'admin_b@example.com',
       passwordHash,
-      firstName: 'Admin',
-      lastName: 'B',
+      nickname: '管理员B',
       phoneNumber: '+86 138-0000-0002',
       status: UserStatus.ACTIVE,
     },

@@ -1,11 +1,8 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
+  Settings,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -91,33 +88,33 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
                 升级到专业版
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            </DropdownMenuGroup>*/}
+            <DropdownMenuSeparator /> 
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <Link to='/settings/account'>
                   <BadgeCheck />
                   账户
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem asChild>
                 <Link to='/settings'>
-                  <CreditCard />
-                  账单
+                  <Settings />
+                  设置
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              {/* <DropdownMenuItem asChild>
                 <Link to='/settings/notifications'>
                   <Bell />
                   通知
                 </Link>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>

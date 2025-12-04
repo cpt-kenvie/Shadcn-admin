@@ -15,8 +15,14 @@ http.interceptors.request.use(
     try {
       // 直接从 localStorage 取 token
       token = localStorage.getItem('token') || ''
+
+      // 调试日志
+      if (!token) {
+        console.warn('[HTTP] 未找到 token，请确保已登录')
+      }
     } catch (_e) {
       token = ''
+      console.error('[HTTP] 读取 token 失败:', _e)
     }
     if (token) {
       config.headers = config.headers || {}

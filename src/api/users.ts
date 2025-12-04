@@ -1,6 +1,6 @@
 /**
  * 模块功能：用户管理 API 请求
- * 最后修改：2025-11-29
+ * 最后修改：2025-12-03
  * 依赖项：@/utils/http
  */
 
@@ -10,8 +10,11 @@ export interface User {
   id: string
   username: string
   email: string | null
-  firstName: string | null
-  lastName: string | null
+  nickname: string | null
+  avatar: string | null
+  bio: string | null
+  urls: string[] | null
+  birthDate: string | null
   phoneNumber: string | null
   status: 'ACTIVE' | 'INACTIVE' | 'INVITED' | 'SUSPENDED'
   lastLogin: string | null
@@ -30,8 +33,11 @@ export interface CreateUserRequest {
   username: string
   email?: string
   password: string
-  firstName?: string
-  lastName?: string
+  nickname?: string
+  avatar?: string
+  bio?: string
+  urls?: string[]
+  birthDate?: string
   phoneNumber?: string
   status?: 'ACTIVE' | 'INACTIVE' | 'INVITED' | 'SUSPENDED'
   roleIds: string[]
@@ -39,8 +45,11 @@ export interface CreateUserRequest {
 
 export interface UpdateUserRequest {
   email?: string
-  firstName?: string
-  lastName?: string
+  nickname?: string
+  avatar?: string
+  bio?: string
+  urls?: string[]
+  birthDate?: string
   phoneNumber?: string
   status?: 'ACTIVE' | 'INACTIVE' | 'INVITED' | 'SUSPENDED'
   roleIds?: string[]

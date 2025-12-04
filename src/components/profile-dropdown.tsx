@@ -36,21 +36,17 @@ export function ProfileDropdown() {
   // 生成用户名首字母缩写
   const getUserInitials = () => {
     if (!user) return 'U'
-    const firstName = user.firstName || user.username
-    const lastName = user.lastName || ''
-    if (firstName && lastName) {
-      return `${firstName[0]}${lastName[0]}`.toUpperCase()
+    const displayName = user.nickname || user.username
+    if (displayName && displayName.length >= 2) {
+      return displayName.substring(0, 2).toUpperCase()
     }
-    return (firstName || 'U').substring(0, 2).toUpperCase()
+    return (displayName || 'U').substring(0, 1).toUpperCase()
   }
 
   // 获取显示名称
   const getDisplayName = () => {
     if (!user) return '用户'
-    if (user.firstName && user.lastName) {
-      return `${user.firstName} ${user.lastName}`
-    }
-    return user.username
+    return user.nickname || user.username
   }
 
   return (
@@ -58,7 +54,7 @@ export function ProfileDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
-            <AvatarImage src='/avatars/shadcn.jpg' alt={getDisplayName()} />
+            <AvatarImage src={user?.avatar || '/avatars/shadcn.jpg'} alt={getDisplayName()} />
             <AvatarFallback>{getUserInitials()}</AvatarFallback>
           </Avatar>
         </Button>
@@ -80,19 +76,19 @@ export function ProfileDropdown() {
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
+          {/* <DropdownMenuItem asChild>
             <Link to='/settings'>
               账单
               <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
             </Link>
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
           <DropdownMenuItem asChild>
             <Link to='/settings'>
               设置
               <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>新团队</DropdownMenuItem>
+          {/* <DropdownMenuItem>新团队</DropdownMenuItem> */}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>

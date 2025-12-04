@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
+import { PreferenceInitializer } from '@/components/preference-initializer'
 import SkipToMain from '@/components/skip-to-main'
 
 interface Props {
@@ -15,6 +16,7 @@ export function AuthenticatedLayout({ children }: Props) {
   return (
     <SearchProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
+        <PreferenceInitializer />
         <SkipToMain />
         <AppSidebar />
         <div

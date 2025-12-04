@@ -57,14 +57,13 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    id: 'fullName',
+    accessorKey: 'nickname',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='名字' />
+      <DataTableColumnHeader column={column} title='昵称' />
     ),
     cell: ({ row }) => {
-      const { firstName, lastName } = row.original
-      const fullName = `${firstName} ${lastName}`
-      return <LongText className='max-w-36'>{fullName}</LongText>
+      const nickname = row.original.nickname
+      return <LongText className='max-w-36'>{nickname || '-'}</LongText>
     },
     meta: { className: 'w-36' },
   },

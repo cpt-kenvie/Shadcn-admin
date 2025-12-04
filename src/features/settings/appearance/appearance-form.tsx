@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
 import { ChevronDownIcon } from '@radix-ui/react-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { fonts } from '@/config/fonts'
@@ -7,6 +8,8 @@ import { cn } from '@/lib/utils'
 import { showSubmittedData } from '@/utils/show-submitted-data'
 import { useFont } from '@/context/font-context'
 import { useTheme } from '@/context/theme-context'
+import { useSetSystemConfig, useSystemConfig } from '@/hooks/use-system-config'
+import { useUserPreference, useUpdateUserPreference } from '@/hooks/use-user-preference'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Form,
@@ -17,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 const appearanceFormSchema = z.object({
@@ -27,6 +31,7 @@ const appearanceFormSchema = z.object({
     invalid_type_error: 'Select a font',
     required_error: '请选择字体。',
   }),
+  logoUrl: z.string().url('请输入有效的URL').optional().or(z.literal('')),
 })
 
 type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
@@ -34,11 +39,15 @@ type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
 export function AppearanceForm() {
   const { font, setFont } = useFont()
   const { theme, setTheme } = useTheme()
+  const { data: systemConfig } = useSystemConfig()
+  const { data: userPreference } = useUserPreference()
+  const setSystemConfigMutation = useSetSystemConfig()
+  const updateUserPreferenceMutation = useUpdateUserPreference()
 
-  // This can come from your database or API.
   const defaultValues: Partial<AppearanceFormValues> = {
-    theme: theme as 'light' | 'dark',
-    font,
+    theme: (userPreference?.data?.theme as 'light' | 'dark') || (theme as 'light' | 'dark'),
+    font: (userPreference?.data?.font as any) || font,
+    logoUrl: systemConfig?.logoUrl || '',
   }
 
   const form = useForm<AppearanceFormValues>({
@@ -46,9 +55,38 @@ export function AppearanceForm() {
     defaultValues,
   })
 
+  // 当用户偏好数据加载完成后，更新表单默认值
+  useEffect(() => {
+    if (userPreference?.data) {
+      form.reset({
+        theme: (userPreference.data.theme as 'light' | 'dark') || (theme as 'light' | 'dark'),
+        font: (userPreference.data.font as any) || font,
+        logoUrl: systemConfig?.logoUrl || '',
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userPreference?.data, systemConfig?.logoUrl])
+
   function onSubmit(data: AppearanceFormValues) {
+    // 更新本地Context（立即生效）
     if (data.font != font) setFont(data.font)
     if (data.theme != theme) setTheme(data.theme)
+
+    // 保存用户偏好到后端
+    updateUserPreferenceMutation.mutate({
+      theme: data.theme,
+      font: data.font,
+    })
+
+    // 保存系统配置（Logo）
+    if (data.logoUrl && data.logoUrl !== systemConfig?.logoUrl) {
+      setSystemConfigMutation.mutate({
+        key: 'logoUrl',
+        value: data.logoUrl,
+        category: 'appearance',
+        description: '系统Logo地址',
+      })
+    }
 
     showSubmittedData(data)
   }
@@ -56,6 +94,25 @@ export function AppearanceForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
+        <FormField
+          control={form.control}
+          name='logoUrl'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Logo地址</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder='https://example.com/logo.png'
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                设置侧边栏顶部显示的Logo图片地址。留空使用默认Logo。
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name='font'

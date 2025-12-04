@@ -7,8 +7,11 @@ interface AuthUser {
   id: string
   username: string
   email: string | null
-  firstName?: string | null
-  lastName?: string | null
+  nickname?: string | null
+  avatar?: string | null
+  bio?: string | null
+  urls?: string[] | null
+  birthDate?: string | null
   phoneNumber?: string | null
   status: string
   lastLogin: string | null

@@ -1,6 +1,6 @@
 /**
  * 模块功能：认证 API 请求
- * 最后修改：2025-11-29
+ * 最后修改：2025-12-03
  * 依赖项：@/utils/http
  */
 
@@ -25,6 +25,16 @@ export interface LoginResponse {
     roles: string[]
   }
   message: string
+}
+
+export interface UpdateProfileRequest {
+  nickname?: string
+  avatar?: string
+  bio?: string
+  urls?: string[]
+  birthDate?: string
+  email?: string
+  phoneNumber?: string
 }
 
 /**
@@ -62,4 +72,13 @@ export const getCurrentUser = () => {
  */
 export const refreshToken = (refreshToken: string) => {
   return http.post('/auth/refresh', { refreshToken })
+}
+
+/**
+ * @description 更新当前用户资料
+ * @param {UpdateProfileRequest} data 更新数据
+ * @returns {Promise} 更新后的用户信息
+ */
+export const updateProfile = (data: UpdateProfileRequest) => {
+  return http.put('/auth/profile', data)
 }

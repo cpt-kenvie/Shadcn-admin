@@ -1,8 +1,3 @@
-/**
- * 模块功能：数据库连接配置
- * 最后修改：2025-11-29
- * 依赖项：@prisma/client
- */
 
 import { PrismaClient } from '@prisma/client'
 
@@ -18,6 +13,11 @@ declare global {
  */
 export const prisma = global.prisma || new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
 })
 
 if (process.env.NODE_ENV !== 'production') {

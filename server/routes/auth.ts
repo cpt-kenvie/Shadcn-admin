@@ -1,6 +1,6 @@
 /**
  * 模块功能：认证路由
- * 最后修改：2025-11-29
+ * 最后修改：2025-12-03
  * 依赖项：express, ../services/authService, ../middleware/auth, ../utils/response
  */
 
@@ -60,6 +60,20 @@ router.get('/me', authenticate, async (req, res, next) => {
   try {
     const user = await authService.getCurrentUser(req.user!.userId)
     sendSuccess(res, user, '获取用户信息成功')
+  } catch (error) {
+    next(error)
+  }
+})
+
+/**
+ * @route PUT /api/auth/profile
+ * @description 更新当前用户资料
+ * @access Private
+ */
+router.put('/profile', authenticate, async (req, res, next) => {
+  try {
+    const user = await authService.updateProfile(req.user!.userId, req.body)
+    sendSuccess(res, user, '更新资料成功')
   } catch (error) {
     next(error)
   }

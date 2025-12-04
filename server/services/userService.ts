@@ -1,6 +1,6 @@
 /**
  * 模块功能：用户管理服务
- * 最后修改：2025-11-29
+ * 最后修改：2025-12-03
  * 依赖项：@prisma/client, bcryptjs, ../config/database, ../utils/error
  */
 
@@ -16,8 +16,11 @@ export interface CreateUserRequest {
   username: string
   email?: string
   password: string
-  firstName?: string
-  lastName?: string
+  nickname?: string
+  avatar?: string
+  bio?: string
+  urls?: string[]
+  birthDate?: Date | string
   phoneNumber?: string
   status?: UserStatus
   roleIds: string[]
@@ -28,8 +31,11 @@ export interface CreateUserRequest {
  */
 export interface UpdateUserRequest {
   email?: string
-  firstName?: string
-  lastName?: string
+  nickname?: string
+  avatar?: string
+  bio?: string
+  urls?: string[]
+  birthDate?: Date | string
   phoneNumber?: string
   status?: UserStatus
   roleIds?: string[]
@@ -57,8 +63,7 @@ export async function getUsers(params: {
     where.OR = [
       { username: { contains: search, mode: 'insensitive' } },
       { email: { contains: search, mode: 'insensitive' } },
-      { firstName: { contains: search, mode: 'insensitive' } },
-      { lastName: { contains: search, mode: 'insensitive' } },
+      { nickname: { contains: search, mode: 'insensitive' } },
     ]
   }
 
@@ -89,8 +94,11 @@ export async function getUsers(params: {
       id: true,
       username: true,
       email: true,
-      firstName: true,
-      lastName: true,
+      nickname: true,
+      avatar: true,
+      bio: true,
+      urls: true,
+      birthDate: true,
       phoneNumber: true,
       status: true,
       lastLogin: true,
@@ -172,7 +180,7 @@ export async function getUserById(id: string) {
  * @throws {ApiError} 创建失败时抛出
  */
 export async function createUser(data: CreateUserRequest) {
-  const { username, email, password, firstName, lastName, phoneNumber, status, roleIds } = data
+  const { username, email, password, nickname, avatar, bio, urls, birthDate, phoneNumber, status, roleIds } = data
 
   // 验证必填字段
   if (!username || !password) {
@@ -230,8 +238,11 @@ export async function createUser(data: CreateUserRequest) {
         username,
         email,
         passwordHash,
-        firstName,
-        lastName,
+        nickname,
+        avatar,
+        bio,
+        urls: urls ? urls : undefined,
+        birthDate: birthDate ? new Date(birthDate) : undefined,
         phoneNumber,
         status: status || UserStatus.ACTIVE,
         userRoles: roleIds && roleIds.length > 0 ? {
@@ -269,7 +280,7 @@ export async function createUser(data: CreateUserRequest) {
  * @throws {ApiError} 更新失败时抛出
  */
 export async function updateUser(id: string, data: UpdateUserRequest) {
-  const { email, firstName, lastName, phoneNumber, status, roleIds, password } = data
+  const { email, nickname, avatar, bio, urls, birthDate, phoneNumber, status, roleIds, password } = data
 
   // 检查用户是否存在
   const existingUser = await prisma.user.findUnique({
@@ -320,8 +331,11 @@ export async function updateUser(id: string, data: UpdateUserRequest) {
       where: { id },
       data: {
         email,
-        firstName,
-        lastName,
+        nickname,
+        avatar,
+        bio,
+        urls: urls !== undefined ? urls : undefined,
+        birthDate: birthDate ? new Date(birthDate) : undefined,
         phoneNumber,
         status,
         ...(passwordHash && { passwordHash }),

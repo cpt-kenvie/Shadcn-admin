@@ -11,7 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 /// 用户表
@@ -20,8 +20,11 @@ model User {
   username      String      @unique @db.VarChar(50)
   email         String?     @unique @db.VarChar(255)
   passwordHash  String      @map("password_hash") @db.VarChar(255)
-  firstName     String?     @map("first_name") @db.VarChar(50)
-  lastName      String?     @map("last_name") @db.VarChar(50)
+  nickname      String?     @db.VarChar(100)
+  avatar        String?     @db.VarChar(500)
+  bio           String?     @db.Text
+  urls          Json?       @db.JsonB
+  birthDate     DateTime?   @map("birth_date") @db.Date
   phoneNumber   String?     @map("phone_number") @db.VarChar(20)
   status        UserStatus  @default(ACTIVE)
   lastLogin     DateTime?   @map("last_login") @db.Timestamptz(6)
@@ -31,6 +34,7 @@ model User {
 
   // 关联
   userRoles     UserRole[]
+  preferences   UserPreference?
 
   @@map("users")
   @@index([username])
@@ -170,4 +174,36 @@ model RoutePermission {
   @@map("route_permissions")
   @@index([routeId])
   @@index([permissionId])
+}
+
+/// 系统配置表
+model SystemConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique @db.VarChar(100)  // 配置键名
+  value     String   @db.Text                   // 配置值
+  category  String   @default("general") @db.VarChar(50) // 配置分类
+  description String? @db.Text                  // 配置描述
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("system_configs")
+  @@index([key])
+  @@index([category])
+}
+
+/// 用户偏好设置表
+model UserPreference {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  theme     String   @default("light") @db.VarChar(20)  // 主题：light, dark
+  font      String   @default("manrope") @db.VarChar(50) // 字体
+  language  String   @default("zh-CN") @db.VarChar(10)   // 语言
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // 关联
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+  @@index([userId])
 }

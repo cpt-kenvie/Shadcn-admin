@@ -133,8 +133,11 @@ export async function getCurrentUser(userId: string) {
       id: true,
       username: true,
       email: true,
-      firstName: true,
-      lastName: true,
+      nickname: true,
+      avatar: true,
+      bio: true,
+      urls: true,
+      birthDate: true,
       phoneNumber: true,
       status: true,
       lastLogin: true,
@@ -180,6 +183,103 @@ export async function getCurrentUser(userId: string) {
     userRoles: undefined, // 移除原始关联数据
     roles,
     permissions,
+  }
+}
+
+/**
+ * @description 更新用户资料请求接口
+ */
+export interface UpdateProfileRequest {
+  nickname?: string
+  avatar?: string
+  bio?: string
+  urls?: string[]
+  birthDate?: Date | string
+  email?: string
+  phoneNumber?: string
+}
+
+/**
+ * @description 更新当前用户资料
+ * @param {string} userId 用户 ID
+ * @param {UpdateProfileRequest} data 更新数据
+ * @returns {Promise<Object>} 更新后的用户信息
+ * @throws {ApiError} 更新失败时抛出
+ */
+export async function updateProfile(userId: string, data: UpdateProfileRequest) {
+  const { nickname, avatar, bio, urls, birthDate, email, phoneNumber } = data
+
+  // 检查用户是否存在
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+  })
+
+  if (!existingUser) {
+    throw createValidationError('用户不存在')
+  }
+
+  // 验证邮箱是否被其他用户使用
+  if (email && email !== existingUser.email) {
+    const emailExists = await prisma.user.findFirst({
+      where: {
+        email,
+        id: { not: userId },
+      },
+    })
+
+    if (emailExists) {
+      throw createValidationError('邮箱已被使用')
+    }
+  }
+
+  // 更新用户资料
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      nickname,
+      avatar,
+      bio,
+      urls: urls !== undefined ? urls : undefined,
+      birthDate: birthDate ? new Date(birthDate) : undefined,
+      email,
+      phoneNumber,
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      nickname: true,
+      avatar: true,
+      bio: true,
+      urls: true,
+      birthDate: true,
+      phoneNumber: true,
+      status: true,
+      lastLogin: true,
+      loginCount: true,
+      createdAt: true,
+      updatedAt: true,
+      userRoles: {
+        include: {
+          role: {
+            select: {
+              id: true,
+              name: true,
+              displayName: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // 提取角色
+  const roles = updatedUser.userRoles.map((ur) => ur.role)
+
+  return {
+    ...updatedUser,
+    userRoles: undefined,
+    roles,
   }
 }
 
