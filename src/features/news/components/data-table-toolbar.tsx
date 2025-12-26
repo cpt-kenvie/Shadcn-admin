@@ -1,14 +1,15 @@
-/**
- * 表格工具栏：包含标题搜索、状态/优先级筛选、重置过滤与视图选项。
- * 与 TanStack Table 的列过滤与视图配置协同工作。
- */
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableViewOptions } from '../components/data-table-view-options'
-import { priorities, statuses } from '../data/data'
 import { DataTableFacetedFilter } from './data-table-faceted-filter'
+
+const newsStatuses = [
+  { value: 'DRAFT', label: '草稿' },
+  { value: 'PUBLISHED', label: '已发布' },
+  { value: 'ARCHIVED', label: '归档' },
+]
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -23,7 +24,7 @@ export function DataTableToolbar<TData>({
     <div className='flex items-center justify-between'>
       <div className='flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2'>
         <Input
-          placeholder='筛选任务...'
+          placeholder='筛选新闻...'
           value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
             table.getColumn('title')?.setFilterValue(event.target.value)
@@ -34,15 +35,8 @@ export function DataTableToolbar<TData>({
           {table.getColumn('status') && (
             <DataTableFacetedFilter
               column={table.getColumn('status')}
-              title='Status'
-              options={statuses}
-            />
-          )}
-          {table.getColumn('priority') && (
-            <DataTableFacetedFilter
-              column={table.getColumn('priority')}
-              title='Priority'
-              options={priorities}
+              title='状态'
+              options={newsStatuses}
             />
           )}
         </div>

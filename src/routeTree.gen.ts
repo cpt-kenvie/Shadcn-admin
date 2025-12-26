@@ -36,6 +36,9 @@ import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
+import { Route as AuthenticatedNewsNewRouteImport } from './routes/_authenticated/news/new'
+import { Route as AuthenticatedNewsCreateRouteImport } from './routes/_authenticated/news/create'
+import { Route as AuthenticatedNewsNewsIdEditRouteImport } from './routes/_authenticated/news/$newsId/edit'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -176,6 +179,22 @@ const AuthenticatedSettingsAppearanceRoute =
     path: '/appearance',
     getParentRoute: () => AuthenticatedSettingsRouteRoute,
   } as any)
+const AuthenticatedNewsNewRoute = AuthenticatedNewsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedNewsRoute,
+} as any)
+const AuthenticatedNewsCreateRoute = AuthenticatedNewsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthenticatedNewsRoute,
+} as any)
+const AuthenticatedNewsNewsIdEditRoute =
+  AuthenticatedNewsNewsIdEditRouteImport.update({
+    id: '/$newsId/edit',
+    path: '/$newsId/edit',
+    getParentRoute: () => AuthenticatedNewsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -191,12 +210,14 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/demo': typeof AuthenticatedDemoRoute
-  '/news': typeof AuthenticatedNewsRoute
+  '/news': typeof AuthenticatedNewsRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/roles': typeof AuthenticatedRolesRoute
   '/routes': typeof AuthenticatedRoutesRoute
   '/tasks': typeof AuthenticatedTasksRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
+  '/news/create': typeof AuthenticatedNewsCreateRoute
+  '/news/new': typeof AuthenticatedNewsNewRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
@@ -204,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/news/$newsId/edit': typeof AuthenticatedNewsNewsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -218,11 +240,13 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/demo': typeof AuthenticatedDemoRoute
-  '/news': typeof AuthenticatedNewsRoute
+  '/news': typeof AuthenticatedNewsRouteWithChildren
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/roles': typeof AuthenticatedRolesRoute
   '/routes': typeof AuthenticatedRoutesRoute
   '/': typeof AuthenticatedIndexRoute
+  '/news/create': typeof AuthenticatedNewsCreateRoute
+  '/news/new': typeof AuthenticatedNewsNewRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
@@ -230,6 +254,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/news/$newsId/edit': typeof AuthenticatedNewsNewsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -247,12 +272,14 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/demo': typeof AuthenticatedDemoRoute
-  '/_authenticated/news': typeof AuthenticatedNewsRoute
+  '/_authenticated/news': typeof AuthenticatedNewsRouteWithChildren
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/routes': typeof AuthenticatedRoutesRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/news/create': typeof AuthenticatedNewsCreateRoute
+  '/_authenticated/news/new': typeof AuthenticatedNewsNewRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
@@ -260,6 +287,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/news/$newsId/edit': typeof AuthenticatedNewsNewsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -283,6 +311,8 @@ export interface FileRouteTypes {
     | '/routes'
     | '/tasks'
     | '/'
+    | '/news/create'
+    | '/news/new'
     | '/settings/appearance'
     | '/apps'
     | '/chats'
@@ -290,6 +320,7 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/tasks/'
     | '/users'
+    | '/news/$newsId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -309,6 +340,8 @@ export interface FileRouteTypes {
     | '/roles'
     | '/routes'
     | '/'
+    | '/news/create'
+    | '/news/new'
     | '/settings/appearance'
     | '/apps'
     | '/chats'
@@ -316,6 +349,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tasks'
     | '/users'
+    | '/news/$newsId/edit'
   id:
     | '__root__'
     | '/_authenticated'
@@ -338,6 +372,8 @@ export interface FileRouteTypes {
     | '/_authenticated/routes'
     | '/_authenticated/tasks'
     | '/_authenticated/'
+    | '/_authenticated/news/create'
+    | '/_authenticated/news/new'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/apps/'
     | '/_authenticated/chats/'
@@ -345,6 +381,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
+    | '/_authenticated/news/$newsId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -553,6 +590,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsAppearanceRouteImport
       parentRoute: typeof AuthenticatedSettingsRouteRoute
     }
+    '/_authenticated/news/new': {
+      id: '/_authenticated/news/new'
+      path: '/new'
+      fullPath: '/news/new'
+      preLoaderRoute: typeof AuthenticatedNewsNewRouteImport
+      parentRoute: typeof AuthenticatedNewsRoute
+    }
+    '/_authenticated/news/create': {
+      id: '/_authenticated/news/create'
+      path: '/create'
+      fullPath: '/news/create'
+      preLoaderRoute: typeof AuthenticatedNewsCreateRouteImport
+      parentRoute: typeof AuthenticatedNewsRoute
+    }
+    '/_authenticated/news/$newsId/edit': {
+      id: '/_authenticated/news/$newsId/edit'
+      path: '/$newsId/edit'
+      fullPath: '/news/$newsId/edit'
+      preLoaderRoute: typeof AuthenticatedNewsNewsIdEditRouteImport
+      parentRoute: typeof AuthenticatedNewsRoute
+    }
   }
 }
 
@@ -572,6 +630,21 @@ const AuthenticatedSettingsRouteRouteWithChildren =
     AuthenticatedSettingsRouteRouteChildren,
   )
 
+interface AuthenticatedNewsRouteChildren {
+  AuthenticatedNewsCreateRoute: typeof AuthenticatedNewsCreateRoute
+  AuthenticatedNewsNewRoute: typeof AuthenticatedNewsNewRoute
+  AuthenticatedNewsNewsIdEditRoute: typeof AuthenticatedNewsNewsIdEditRoute
+}
+
+const AuthenticatedNewsRouteChildren: AuthenticatedNewsRouteChildren = {
+  AuthenticatedNewsCreateRoute: AuthenticatedNewsCreateRoute,
+  AuthenticatedNewsNewRoute: AuthenticatedNewsNewRoute,
+  AuthenticatedNewsNewsIdEditRoute: AuthenticatedNewsNewsIdEditRoute,
+}
+
+const AuthenticatedNewsRouteWithChildren =
+  AuthenticatedNewsRoute._addFileChildren(AuthenticatedNewsRouteChildren)
+
 interface AuthenticatedTasksRouteChildren {
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
 }
@@ -586,7 +659,7 @@ const AuthenticatedTasksRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedDemoRoute: typeof AuthenticatedDemoRoute
-  AuthenticatedNewsRoute: typeof AuthenticatedNewsRoute
+  AuthenticatedNewsRoute: typeof AuthenticatedNewsRouteWithChildren
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
   AuthenticatedRoutesRoute: typeof AuthenticatedRoutesRoute
@@ -601,7 +674,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedDemoRoute: AuthenticatedDemoRoute,
-  AuthenticatedNewsRoute: AuthenticatedNewsRoute,
+  AuthenticatedNewsRoute: AuthenticatedNewsRouteWithChildren,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedRolesRoute: AuthenticatedRolesRoute,
   AuthenticatedRoutesRoute: AuthenticatedRoutesRoute,

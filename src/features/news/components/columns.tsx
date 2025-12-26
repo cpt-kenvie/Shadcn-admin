@@ -1,16 +1,24 @@
-/**
- * 任务表列定义：配置选择列、ID、标题、状态、优先级与行操作。
- * 基于 TanStack Table 的 `ColumnDef<Task>`，并使用自定义单元格渲染。
- */
 import { ColumnDef } from '@tanstack/react-table'
+import { format } from 'date-fns'
+import type { NewsItem, NewsStatus } from '@/api/news'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { labels, priorities, statuses } from '../data/data'
-import { Task } from '../data/schema'
 import { DataTableColumnHeader } from './data-table-column-header'
-import { DataTableRowActions } from './data-table-row-actions'
+import { NewsRowActions } from './news-row-actions'
 
-export const columns: ColumnDef<Task>[] = [
+const statusLabel: Record<NewsStatus, string> = {
+  DRAFT: '草稿',
+  PUBLISHED: '已发布',
+  ARCHIVED: '归档',
+}
+
+function statusBadgeVariant(status: NewsStatus) {
+  if (status === 'PUBLISHED') return 'default'
+  if (status === 'ARCHIVED') return 'outline'
+  return 'secondary'
+}
+
+export const columns: ColumnDef<NewsItem>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -36,28 +44,20 @@ export const columns: ColumnDef<Task>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'id',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Task' />
-    ),
-    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('id')}</div>,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'title',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Title' />
+      <DataTableColumnHeader column={column} title='标题' />
     ),
     cell: ({ row }) => {
-      const label = labels.find((label) => label.value === row.original.label)
-
+      const item = row.original
       return (
-        <div className='flex space-x-2'>
-          {label && <Badge variant='outline'>{label.label}</Badge>}
+        <div className='space-y-1'>
           <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('title')}
+            {item.title}
           </span>
+          <p className='text-muted-foreground max-w-[40rem] truncate text-sm'>
+            {item.summary}
+          </p>
         </div>
       )
     },
@@ -65,59 +65,47 @@ export const columns: ColumnDef<Task>[] = [
   {
     accessorKey: 'status',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
+      <DataTableColumnHeader column={column} title='状态' />
     ),
     cell: ({ row }) => {
-      const status = statuses.find(
-        (status) => status.value === row.getValue('status')
-      )
-
-      if (!status) {
-        return null
-      }
-
-      return (
-        <div className='flex w-[100px] items-center'>
-          {status.icon && (
-            <status.icon className='text-muted-foreground mr-2 h-4 w-4' />
-          )}
-          <span>{status.label}</span>
-        </div>
-      )
+      const value = row.getValue('status') as NewsStatus
+      return <Badge variant={statusBadgeVariant(value)}>{statusLabel[value]}</Badge>
     },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+    filterFn: (row, id, value) => value.includes(row.getValue(id)),
+  },
+  {
+    id: 'author',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='发布人' />
+    ),
+    accessorFn: (row) => row.author?.nickname || row.author?.username || '-',
+    cell: ({ row }) => <span className='text-sm'>{row.getValue('author')}</span>,
+  },
+  {
+    accessorKey: 'publishedAt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='发布日期' />
+    ),
+    cell: ({ row }) => {
+      const publishedAt = row.original.publishedAt
+      if (!publishedAt) return <span className='text-sm text-muted-foreground'>-</span>
+      return (
+        <span className='text-sm'>{format(new Date(publishedAt), 'yyyy-MM-dd')}</span>
+      )
     },
   },
   {
-    accessorKey: 'priority',
+    accessorKey: 'views',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Priority' />
+      <DataTableColumnHeader column={column} title='浏览' />
     ),
-    cell: ({ row }) => {
-      const priority = priorities.find(
-        (priority) => priority.value === row.getValue('priority')
-      )
-
-      if (!priority) {
-        return null
-      }
-
-      return (
-        <div className='flex items-center'>
-          {priority.icon && (
-            <priority.icon className='text-muted-foreground mr-2 h-4 w-4' />
-          )}
-          <span>{priority.label}</span>
-        </div>
-      )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
+    cell: ({ row }) => <span className='text-sm'>{row.original.views}</span>,
   },
   {
     id: 'actions',
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    header: () => <div className='text-right'>操作</div>,
+    cell: ({ row }) => <NewsRowActions item={row.original} />,
+    enableSorting: false,
+    enableHiding: false,
   },
 ]

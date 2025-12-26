@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie'
 import { create } from 'zustand'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
+const ACCESS_TOKEN = import.meta.env.VITE_ACCESS_TOKEN_KEY || 'htec_access_token'
 
 interface AuthUser {
   id: string
