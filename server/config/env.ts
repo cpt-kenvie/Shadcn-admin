@@ -28,7 +28,7 @@ export const config = {
 
   // CORS 配置
   cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:8888',
     credentials: true,
   },
 

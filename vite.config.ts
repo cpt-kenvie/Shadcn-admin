@@ -26,7 +26,7 @@ export default defineConfig({
   server: {
     host: true,
     //  从.env获取
-    port: 5173,
+    port: 8888,
     strictPort: true,
   },
 })

@@ -16,6 +16,7 @@ import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedRoutesRouteImport } from './routes/_authenticated/routes'
 import { Route as AuthenticatedRolesRouteImport } from './routes/_authenticated/roles'
 import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
+import { Route as AuthenticatedNewsRouteImport } from './routes/_authenticated/news'
 import { Route as AuthenticatedDemoRouteImport } from './routes/_authenticated/demo'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
@@ -71,6 +72,11 @@ const AuthenticatedPermissionsRoute =
     path: '/permissions',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedNewsRoute = AuthenticatedNewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDemoRoute = AuthenticatedDemoRouteImport.update({
   id: '/demo',
   path: '/demo',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/demo': typeof AuthenticatedDemoRoute
+  '/news': typeof AuthenticatedNewsRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/roles': typeof AuthenticatedRolesRoute
   '/routes': typeof AuthenticatedRoutesRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/demo': typeof AuthenticatedDemoRoute
+  '/news': typeof AuthenticatedNewsRoute
   '/permissions': typeof AuthenticatedPermissionsRoute
   '/roles': typeof AuthenticatedRolesRoute
   '/routes': typeof AuthenticatedRoutesRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/demo': typeof AuthenticatedDemoRoute
+  '/_authenticated/news': typeof AuthenticatedNewsRoute
   '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/roles': typeof AuthenticatedRolesRoute
   '/_authenticated/routes': typeof AuthenticatedRoutesRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/demo'
+    | '/news'
     | '/permissions'
     | '/roles'
     | '/routes'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/demo'
+    | '/news'
     | '/permissions'
     | '/roles'
     | '/routes'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/demo'
+    | '/_authenticated/news'
     | '/_authenticated/permissions'
     | '/_authenticated/roles'
     | '/_authenticated/routes'
@@ -399,6 +411,13 @@ declare module '@tanstack/react-router' {
       path: '/permissions'
       fullPath: '/permissions'
       preLoaderRoute: typeof AuthenticatedPermissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/news': {
+      id: '/_authenticated/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof AuthenticatedNewsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/demo': {
@@ -567,6 +586,7 @@ const AuthenticatedTasksRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedDemoRoute: typeof AuthenticatedDemoRoute
+  AuthenticatedNewsRoute: typeof AuthenticatedNewsRoute
   AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedRolesRoute: typeof AuthenticatedRolesRoute
   AuthenticatedRoutesRoute: typeof AuthenticatedRoutesRoute
@@ -581,6 +601,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedDemoRoute: AuthenticatedDemoRoute,
+  AuthenticatedNewsRoute: AuthenticatedNewsRoute,
   AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedRolesRoute: AuthenticatedRolesRoute,
   AuthenticatedRoutesRoute: AuthenticatedRoutesRoute,
