@@ -12,12 +12,10 @@ import { sidebarData } from './data/sidebar-data'
 import { useUserMenus } from '@/hooks/use-user-menus'
 import { getSidebarDataFromMenus } from './data/dynamic-sidebar-data'
 import { useAuth } from '@/stores/authStore'
-import { useSystemConfig } from '@/hooks/use-system-config'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: menusData, isLoading } = useUserMenus()
   const { user } = useAuth()
-  const { data: systemConfig } = useSystemConfig()
 
   // 如果菜单数据加载中或失败，使用默认侧边栏数据
   const dynamicSidebarData = menusData?.data
@@ -31,7 +29,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible='icon' variant='floating' {...props}>
       <SidebarHeader>
-        <AppLogo logoUrl={systemConfig?.logoUrl} />
+        <AppLogo />
       </SidebarHeader>
       <SidebarContent>
         {isLoading ? (

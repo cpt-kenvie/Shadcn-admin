@@ -1,11 +1,9 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
-import { useEffect } from 'react'
 import { ChevronDownIcon } from '@radix-ui/react-icons'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { fonts } from '@/config/fonts'
 import { cn } from '@/lib/utils'
-import { showSubmittedData } from '@/utils/show-submitted-data'
 import { useFont } from '@/context/font-context'
 import { useTheme } from '@/context/theme-context'
 import { useSetSystemConfig, useSystemConfig } from '@/hooks/use-system-config'
@@ -24,14 +22,27 @@ import { Input } from '@/components/ui/input'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 const appearanceFormSchema = z.object({
-  theme: z.enum(['light', 'dark'], {
+  theme: z.enum(['light', 'dark', 'system'], {
     required_error: '请选择主题。',
   }),
   font: z.enum(fonts, {
     invalid_type_error: 'Select a font',
     required_error: '请选择字体。',
   }),
-  logoUrl: z.string().url('请输入有效的URL').optional().or(z.literal('')),
+  logoUrl: z.string()
+    .refine(
+      (val) => !val || val.startsWith('/') || /^https?:\/\//.test(val),
+      '请输入有效的URL或相对路径（以/开头）'
+    )
+    .optional()
+    .or(z.literal('')),
+  darkLogoUrl: z.string()
+    .refine(
+      (val) => !val || val.startsWith('/') || /^https?:\/\//.test(val),
+      '请输入有效的URL或相对路径（以/开头）'
+    )
+    .optional()
+    .or(z.literal('')),
 })
 
 type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
@@ -40,55 +51,55 @@ export function AppearanceForm() {
   const { font, setFont } = useFont()
   const { theme, setTheme } = useTheme()
   const { data: systemConfig } = useSystemConfig()
-  const { data: userPreference } = useUserPreference()
+  const { data: userPreference, isFetched } = useUserPreference()
   const setSystemConfigMutation = useSetSystemConfig()
   const updateUserPreferenceMutation = useUpdateUserPreference()
 
-  const defaultValues: Partial<AppearanceFormValues> = {
-    theme: (userPreference?.data?.theme as 'light' | 'dark') || (theme as 'light' | 'dark'),
-    font: (userPreference?.data?.font as any) || font,
-    logoUrl: systemConfig?.logoUrl || '',
-  }
+  const apiTheme = userPreference?.data?.theme as 'light' | 'dark' | 'system' | undefined
+  const apiFont = userPreference?.data?.font as typeof font | undefined
 
   const form = useForm<AppearanceFormValues>({
     resolver: zodResolver(appearanceFormSchema),
-    defaultValues,
+    values: isFetched ? {
+      theme: apiTheme || theme,
+      font: apiFont || font,
+      logoUrl: systemConfig?.logoUrl || '',
+      darkLogoUrl: systemConfig?.darkLogoUrl || '',
+    } : undefined,
+    defaultValues: {
+      theme: theme as 'light' | 'dark' | 'system',
+      font: font,
+      logoUrl: '',
+      darkLogoUrl: '',
+    },
   })
 
-  // 当用户偏好数据加载完成后，更新表单默认值
-  useEffect(() => {
-    if (userPreference?.data) {
-      form.reset({
-        theme: (userPreference.data.theme as 'light' | 'dark') || (theme as 'light' | 'dark'),
-        font: (userPreference.data.font as any) || font,
-        logoUrl: systemConfig?.logoUrl || '',
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userPreference?.data, systemConfig?.logoUrl])
-
   function onSubmit(data: AppearanceFormValues) {
-    // 更新本地Context（立即生效）
     if (data.font != font) setFont(data.font)
     if (data.theme != theme) setTheme(data.theme)
 
-    // 保存用户偏好到后端
     updateUserPreferenceMutation.mutate({
       theme: data.theme,
       font: data.font,
     })
 
-    // 保存系统配置（Logo）
     if (data.logoUrl && data.logoUrl !== systemConfig?.logoUrl) {
       setSystemConfigMutation.mutate({
         key: 'logoUrl',
         value: data.logoUrl,
         category: 'appearance',
-        description: '系统Logo地址',
+        description: '浅色主题Logo地址',
       })
     }
 
-    showSubmittedData(data)
+    if (data.darkLogoUrl && data.darkLogoUrl !== systemConfig?.darkLogoUrl) {
+      setSystemConfigMutation.mutate({
+        key: 'darkLogoUrl',
+        value: data.darkLogoUrl,
+        category: 'appearance',
+        description: '深色主题Logo地址',
+      })
+    }
   }
 
   return (
@@ -99,15 +110,34 @@ export function AppearanceForm() {
           name='logoUrl'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Logo地址</FormLabel>
+              <FormLabel>浅色主题Logo地址</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='https://example.com/logo.png'
+                  placeholder='https://example.com/logo.png 或 /images/logo.png'
                   {...field}
                 />
               </FormControl>
               <FormDescription>
-                设置侧边栏顶部显示的Logo图片地址。留空使用默认Logo。
+                设置浅色主题下侧边栏顶部显示的Logo图片地址。留空使用默认Logo。
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='darkLogoUrl'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>深色主题Logo地址</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder='https://example.com/dark-logo.png 或 /images/dark-logo.png'
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                设置深色主题下侧边栏顶部显示的Logo图片地址。留空使用默认Logo。
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -157,8 +187,8 @@ export function AppearanceForm() {
               <FormMessage />
               <RadioGroup
                 onValueChange={field.onChange}
-                defaultValue={field.value}
-                className='grid max-w-md grid-cols-2 gap-8 pt-2'
+                value={field.value}
+                className='grid max-w-2xl grid-cols-3 gap-8 pt-2'
               >
                 <FormItem>
                   <FormLabel className='[&:has([data-state=checked])>div]:border-primary'>
@@ -209,6 +239,32 @@ export function AppearanceForm() {
                     </div>
                     <span className='block w-full p-2 text-center font-normal'>
                       深色
+                    </span>
+                  </FormLabel>
+                </FormItem>
+                <FormItem>
+                  <FormLabel className='[&:has([data-state=checked])>div]:border-primary'>
+                    <FormControl>
+                      <RadioGroupItem value='system' className='sr-only' />
+                    </FormControl>
+                    <div className='border-muted hover:border-accent items-center rounded-md border-2 p-1'>
+                      <div className='space-y-2 rounded-sm bg-gradient-to-r from-[#ecedef] to-slate-950 p-2'>
+                        <div className='space-y-2 rounded-md bg-gradient-to-r from-white to-slate-800 p-2 shadow-xs'>
+                          <div className='h-2 w-[80px] rounded-lg bg-gradient-to-r from-[#ecedef] to-slate-400' />
+                          <div className='h-2 w-[100px] rounded-lg bg-gradient-to-r from-[#ecedef] to-slate-400' />
+                        </div>
+                        <div className='flex items-center space-x-2 rounded-md bg-gradient-to-r from-white to-slate-800 p-2 shadow-xs'>
+                          <div className='h-4 w-4 rounded-full bg-gradient-to-r from-[#ecedef] to-slate-400' />
+                          <div className='h-2 w-[100px] rounded-lg bg-gradient-to-r from-[#ecedef] to-slate-400' />
+                        </div>
+                        <div className='flex items-center space-x-2 rounded-md bg-gradient-to-r from-white to-slate-800 p-2 shadow-xs'>
+                          <div className='h-4 w-4 rounded-full bg-gradient-to-r from-[#ecedef] to-slate-400' />
+                          <div className='h-2 w-[100px] rounded-lg bg-gradient-to-r from-[#ecedef] to-slate-400' />
+                        </div>
+                      </div>
+                    </div>
+                    <span className='block w-full p-2 text-center font-normal'>
+                      跟随系统
                     </span>
                   </FormLabel>
                 </FormItem>

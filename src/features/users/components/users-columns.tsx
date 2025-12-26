@@ -59,7 +59,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'nickname',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='鏄电О' />
+      <DataTableColumnHeader column={column} title='角色' />
     ),
     cell: ({ row }) => {
       const nickname = row.original.nickname
@@ -70,7 +70,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'email',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='閭' />
+      <DataTableColumnHeader column={column} title='邮箱' />
     ),
     cell: ({ row }) => (
       <div className='w-fit text-nowrap'>{row.getValue('email')}</div>
@@ -79,7 +79,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'phoneNumber',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='鐢佃瘽鍙风爜' />
+      <DataTableColumnHeader column={column} title='手机号码' />
     ),
     cell: ({ row }) => <div>{row.getValue('phoneNumber')}</div>,
     enableSorting: false,

@@ -1,29 +1,35 @@
 /**
  * 模块功能：应用Logo组件
- * 最后修改：2025-12-03
- * 依赖项：@/components/ui/sidebar, @/hooks/use-system-config
+ * 最后修改：2025-12-26
+ * 依赖项：@/components/ui/sidebar, @/hooks/use-system-config, @/context/theme-context
  */
 
 import { useSidebar } from '@/components/ui/sidebar'
+import { useTheme } from '@/context/theme-context'
+import { useSystemConfig } from '@/hooks/use-system-config'
 import { cn } from '@/lib/utils'
 
 interface AppLogoProps {
-  logoUrl?: string
   className?: string
 }
 
 /**
- * @description 应用Logo组件，显示在侧边栏顶部
- * @param {string} logoUrl - Logo图片URL
+ * @description 应用Logo组件，显示在侧边栏顶部，根据主题自动切换logo
  * @param {string} className - 额外的CSS类名
  * @returns {JSX.Element} Logo组件
  */
-export function AppLogo({ logoUrl, className }: AppLogoProps) {
+export function AppLogo({ className }: AppLogoProps) {
   const { state } = useSidebar()
+  const { effectiveTheme } = useTheme()
+  const { data: systemConfig } = useSystemConfig()
   const isCollapsed = state === 'collapsed'
 
-  const defaultLogo = '/images/Logo.png'
-  const displayLogo = logoUrl || defaultLogo
+  const defaultLightLogo = '/images/Logo.png'
+  const defaultDarkLogo = '/images/white-Logo.webp'
+
+  const lightLogo = systemConfig?.logoUrl || defaultLightLogo
+  const darkLogo = systemConfig?.darkLogoUrl || defaultDarkLogo
+  const displayLogo = effectiveTheme === 'dark' ? darkLogo : lightLogo
 
   return (
     <div
@@ -41,10 +47,10 @@ export function AppLogo({ logoUrl, className }: AppLogoProps) {
           isCollapsed ? 'h-8 w-8' : 'h-10 w-auto max-w-[180px]'
         )}
         onError={(e) => {
-          // 图片加载失败时使用默认logo
           const target = e.target as HTMLImageElement
-          if (target.src !== defaultLogo) {
-            target.src = defaultLogo
+          const fallbackLogo = effectiveTheme === 'dark' ? defaultDarkLogo : defaultLightLogo
+          if (target.src !== fallbackLogo) {
+            target.src = fallbackLogo
           }
         }}
       />

@@ -11,11 +11,13 @@ type ThemeProviderProps = {
 type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
+  effectiveTheme: 'light' | 'dark'
 }
 
 const initialState: ThemeProviderState = {
   theme: 'system',
   setTheme: () => null,
+  effectiveTheme: 'light',
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
@@ -29,16 +31,18 @@ export function ThemeProvider({
   const [theme, _setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   )
+  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
     const root = window.document.documentElement
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
     const applyTheme = (theme: Theme) => {
-      root.classList.remove('light', 'dark') // Remove existing theme classes
+      root.classList.remove('light', 'dark')
       const systemTheme = mediaQuery.matches ? 'dark' : 'light'
-      const effectiveTheme = theme === 'system' ? systemTheme : theme
-      root.classList.add(effectiveTheme) // Add the new theme class
+      const resolvedTheme = theme === 'system' ? systemTheme : theme
+      root.classList.add(resolvedTheme)
+      setEffectiveTheme(resolvedTheme)
     }
 
     const handleChange = () => {
@@ -62,6 +66,7 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme,
+    effectiveTheme,
   }
 
   return (

@@ -27,6 +27,35 @@ function parseNewsStatus(value: unknown): NewsStatus | undefined {
   return NEWS_STATUSES.find((s) => s === value)
 }
 
+router.get('/stats', requirePermission('READ', 'news'), async (req, res, next) => {
+  try {
+    const stats = await newsService.getNewsStats()
+    sendSuccess(res, stats, '获取新闻统计成功')
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/stats/trend', requirePermission('READ', 'news'), async (req, res, next) => {
+  try {
+    const days = parsePositiveInt(req.query.days) ?? 10
+    const trend = await newsService.getNewsViewsTrend(days)
+    sendSuccess(res, trend, '获取浏览趋势成功')
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/stats/top', requirePermission('READ', 'news'), async (req, res, next) => {
+  try {
+    const limit = parsePositiveInt(req.query.limit) ?? 5
+    const top = await newsService.getTopViewedNews(limit)
+    sendSuccess(res, top, '获取热门文章成功')
+  } catch (error) {
+    next(error)
+  }
+})
+
 router.get('/', requirePermission('READ', 'news'), async (req, res, next) => {
   try {
     const page = parsePositiveInt(req.query.page)

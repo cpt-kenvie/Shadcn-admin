@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { IconCheck, IconMoon, IconSun } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { useTheme } from '@/context/theme-context'
+import { useUpdateUserPreference } from '@/hooks/use-user-preference'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,14 +13,18 @@ import {
 
 export function ThemeSwitch() {
   const { theme, setTheme } = useTheme()
+  const updateUserPreferenceMutation = useUpdateUserPreference()
 
-  /* Update theme-color meta tag
-   * when theme is updated */
   useEffect(() => {
     const themeColor = theme === 'dark' ? '#020817' : '#fff'
     const metaThemeColor = document.querySelector("meta[name='theme-color']")
     if (metaThemeColor) metaThemeColor.setAttribute('content', themeColor)
   }, [theme])
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme)
+    updateUserPreferenceMutation.mutate({ theme: newTheme })
+  }
 
   return (
     <DropdownMenu modal={false}>
@@ -31,21 +36,21 @@ export function ThemeSwitch() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
-        <DropdownMenuItem onClick={() => setTheme('light')}>
+        <DropdownMenuItem onClick={() => handleThemeChange('light')}>
           浅色{' '}
           <IconCheck
             size={14}
             className={cn('ml-auto', theme !== 'light' && 'hidden')}
           />
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
+        <DropdownMenuItem onClick={() => handleThemeChange('dark')}>
           深色
           <IconCheck
             size={14}
             className={cn('ml-auto', theme !== 'dark' && 'hidden')}
           />
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
+        <DropdownMenuItem onClick={() => handleThemeChange('system')}>
           跟随系统
           <IconCheck
             size={14}

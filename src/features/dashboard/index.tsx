@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -15,8 +16,24 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Overview } from './components/overview'
 import { RecentSales } from './components/recent-sales'
+import { getNewsStats, type NewsStats } from '@/api/news'
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<NewsStats | null>(null)
+
+  useEffect(() => {
+    getNewsStats().then((res) => {
+      if (res.data.success) {
+        setStats(res.data.data)
+      }
+    })
+  }, [])
+
+  const formatGrowth = (value: number) => {
+    const prefix = value >= 0 ? '+' : ''
+    return `${prefix}${value}%`
+  }
+
   return (
     <>
       {/* ===== Top Heading ===== */}
@@ -61,7 +78,7 @@ export default function Dashboard() {
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
                   <CardTitle className='text-sm font-medium'>
-                    总收入
+                    新闻文章总浏览量
                   </CardTitle>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -73,20 +90,21 @@ export default function Dashboard() {
                     strokeWidth='2'
                     className='text-muted-foreground h-4 w-4'
                   >
-                    <path d='M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6' />
+                    <path d='M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z' />
+                    <circle cx='12' cy='12' r='3' />
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>$45,231.89</div>
+                  <div className='text-2xl font-bold'>{stats?.totalViews?.toLocaleString() ?? '-'}</div>
                   <p className='text-muted-foreground text-xs'>
-                    比上月增长 20.1%
+                    已发布文章累计浏览
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
                   <CardTitle className='text-sm font-medium'>
-                    订阅数
+                    今日浏览量
                   </CardTitle>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -104,15 +122,15 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>+2350</div>
+                  <div className='text-2xl font-bold'>{stats?.todayViews?.toLocaleString() ?? '-'}</div>
                   <p className='text-muted-foreground text-xs'>
-                    比上月增长 180.1%
+                    比昨日 {stats ? formatGrowth(stats.todayGrowth) : '-'}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>销售量</CardTitle>
+                  <CardTitle className='text-sm font-medium'>本月浏览量</CardTitle>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     viewBox='0 0 24 24'
@@ -128,9 +146,9 @@ export default function Dashboard() {
                   </svg>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>+12,234</div>
+                  <div className='text-2xl font-bold'>{stats?.monthlyViews?.toLocaleString() ?? '-'}</div>
                   <p className='text-muted-foreground text-xs'>
-                    比上月增长 19%
+                    比上月 {stats ? formatGrowth(stats.monthlyGrowth) : '-'}
                   </p>
                 </CardContent>
               </Card>
@@ -163,7 +181,7 @@ export default function Dashboard() {
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
               <Card className='col-span-1 lg:col-span-4'>
                 <CardHeader>
-                  <CardTitle>总览</CardTitle>
+                  <CardTitle>浏览趋势</CardTitle>
                 </CardHeader>
                 <CardContent className='pl-2'>
                   <Overview />
@@ -171,9 +189,9 @@ export default function Dashboard() {
               </Card>
               <Card className='col-span-1 lg:col-span-3'>
                 <CardHeader>
-                  <CardTitle>最近销售</CardTitle>
+                  <CardTitle>热门文章</CardTitle>
                   <CardDescription>
-                    本月已完成 265 笔销售。
+                    浏览量排名前5的文章
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

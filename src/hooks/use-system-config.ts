@@ -59,6 +59,7 @@ export function useSystemConfig() {
   return {
     data: {
       logoUrl: configMap.logoUrl || '/images/Logo.png',
+      darkLogoUrl: configMap.darkLogoUrl || '/images/white-Logo.webp',
     },
     isLoading,
     error,

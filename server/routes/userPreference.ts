@@ -17,7 +17,7 @@ const router = Router()
 
 // 偏好设置验证schema
 const preferenceSchema = z.object({
-  theme: z.enum(['light', 'dark']).optional(),
+  theme: z.enum(['light', 'dark', 'system']).optional(),
   font: z.string().min(1).max(50).optional(),
   language: z.string().min(2).max(10).optional(),
 })

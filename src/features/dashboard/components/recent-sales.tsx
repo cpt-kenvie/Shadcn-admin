@@ -1,75 +1,35 @@
+import { useEffect, useState } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { getTopViewedNews, type TopNewsItem } from '@/api/news'
 
 export function RecentSales() {
+  const [items, setItems] = useState<TopNewsItem[]>([])
+
+  useEffect(() => {
+    getTopViewedNews(5).then((res) => {
+      if (res.data.success) {
+        setItems(res.data.data)
+      }
+    })
+  }, [])
+
   return (
     <div className='space-y-8'>
-      <div className='flex items-center gap-4'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/01.png' alt='Avatar' />
-          <AvatarFallback>OM</AvatarFallback>
-        </Avatar>
-        <div className='flex flex-1 flex-wrap items-center justify-between'>
-          <div className='space-y-1'>
-            <p className='text-sm leading-none font-medium'>欧莉维娅·马丁</p>
-            <p className='text-muted-foreground text-sm'>ouliweiya.martin@email.com</p>
+      {items.map((item) => (
+        <div key={item.id} className='flex items-center gap-4'>
+          <Avatar className='h-9 w-9'>
+            <AvatarImage src={item.author.avatar ?? ''} alt={item.author.nickname ?? item.author.username} />
+            <AvatarFallback>{(item.author.nickname ?? item.author.username).slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div className='flex flex-1 flex-wrap items-center justify-between'>
+            <div className='space-y-1'>
+              <p className='text-sm leading-none font-medium line-clamp-1'>{item.title}</p>
+              <p className='text-muted-foreground text-sm'>{item.author.nickname ?? item.author.username}</p>
+            </div>
+            <div className='font-medium'>{item.views.toLocaleString()} 浏览</div>
           </div>
-          <div className='font-medium'>+$1,999.00</div>
         </div>
-      </div>
-      <div className='flex items-center gap-4'>
-        <Avatar className='flex h-9 w-9 items-center justify-center space-y-0 border'>
-          <AvatarImage src='/avatars/02.png' alt='Avatar' />
-          <AvatarFallback>JL</AvatarFallback>
-        </Avatar>
-        <div className='flex flex-1 flex-wrap items-center justify-between'>
-          <div className='space-y-1'>
-            <p className='text-sm leading-none font-medium'>李杰克逊</p>
-            <p className='text-muted-foreground text-sm'>lijackson@email.com</p>
-          </div>
-          <div className='font-medium'>+$39.00</div>
-        </div>
-      </div>
-      <div className='flex items-center gap-4'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/03.png' alt='Avatar' />
-          <AvatarFallback>IN</AvatarFallback>
-        </Avatar>
-        <div className='flex flex-1 flex-wrap items-center justify-between'>
-          <div className='space-y-1'>
-            <p className='text-sm leading-none font-medium'>阮伊莎贝拉</p>
-            <p className='text-muted-foreground text-sm'>ruan.isabella@email.com</p>
-          </div>
-          <div className='font-medium'>+$299.00</div>
-        </div>
-      </div>
-
-      <div className='flex items-center gap-4'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/04.png' alt='Avatar' />
-          <AvatarFallback>WK</AvatarFallback>
-        </Avatar>
-        <div className='flex flex-1 flex-wrap items-center justify-between'>
-          <div className='space-y-1'>
-            <p className='text-sm leading-none font-medium'>金威廉</p>
-            <p className='text-muted-foreground text-sm'>jin.william@email.com</p>
-          </div>
-          <div className='font-medium'>+$99.00</div>
-        </div>
-      </div>
-
-      <div className='flex items-center gap-4'>
-        <Avatar className='h-9 w-9'>
-          <AvatarImage src='/avatars/05.png' alt='Avatar' />
-          <AvatarFallback>SD</AvatarFallback>
-        </Avatar>
-        <div className='flex flex-1 flex-wrap items-center justify-between'>
-          <div className='space-y-1'>
-            <p className='text-sm leading-none font-medium'>索菲娅·戴维斯</p>
-            <p className='text-muted-foreground text-sm'>suofeiya.davis@email.com</p>
-          </div>
-          <div className='font-medium'>+$39.00</div>
-        </div>
-      </div>
+      ))}
     </div>
   )
 }

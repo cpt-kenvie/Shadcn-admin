@@ -9,6 +9,7 @@ import {
 } from '@tabler/icons-react'
 import { useSearch } from '@/context/search-context'
 import { useTheme } from '@/context/theme-context'
+import { useUpdateUserPreference } from '@/hooks/use-user-preference'
 import {
   CommandDialog,
   CommandEmpty,
@@ -25,6 +26,15 @@ export function CommandMenu() {
   const navigate = useNavigate()
   const { setTheme } = useTheme()
   const { open, setOpen } = useSearch()
+  const updateUserPreferenceMutation = useUpdateUserPreference()
+
+  const handleThemeChange = React.useCallback(
+    (newTheme: 'light' | 'dark' | 'system') => {
+      setTheme(newTheme)
+      updateUserPreferenceMutation.mutate({ theme: newTheme })
+    },
+    [setTheme, updateUserPreferenceMutation]
+  )
 
   const runCommand = React.useCallback(
     (command: () => unknown) => {
@@ -78,14 +88,14 @@ export function CommandMenu() {
           ))}
           <CommandSeparator />
           <CommandGroup heading='主题'>
-            <CommandItem onSelect={() => runCommand(() => setTheme('light'))}>
+            <CommandItem onSelect={() => runCommand(() => handleThemeChange('light'))}>
               <IconSun /> <span>浅色</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => setTheme('dark'))}>
+            <CommandItem onSelect={() => runCommand(() => handleThemeChange('dark'))}>
               <IconMoon className='scale-90' />
               <span>深色</span>
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => setTheme('system'))}>
+            <CommandItem onSelect={() => runCommand(() => handleThemeChange('system'))}>
               <IconDeviceLaptop />
               <span>跟随系统</span>
             </CommandItem>

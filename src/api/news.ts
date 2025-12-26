@@ -69,3 +69,36 @@ export const deleteNews = (id: string) => {
   return http.delete(`/news/${id}`)
 }
 
+export interface NewsStats {
+  totalViews: number
+  todayViews: number
+  todayGrowth: number
+  monthlyViews: number
+  monthlyGrowth: number
+}
+
+export interface ViewsTrendItem {
+  name: string
+  total: number
+}
+
+export interface TopNewsItem {
+  id: string
+  title: string
+  views: number
+  publishedAt: string | null
+  author: NewsAuthor
+}
+
+export const getNewsStats = () => {
+  return http.get<NewsStats>('/news/stats')
+}
+
+export const getNewsViewsTrend = (days?: number) => {
+  return http.get<ViewsTrendItem[]>('/news/stats/trend', { params: { days } })
+}
+
+export const getTopViewedNews = (limit?: number) => {
+  return http.get<TopNewsItem[]>('/news/stats/top', { params: { limit } })
+}
+

@@ -430,3 +430,127 @@ export async function incrementPublicNewsViews(id: string) {
 
   return { views: updated!.views }
 }
+
+export async function getNewsStats() {
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterdayStart = new Date(todayStart.getTime() - 24 * 60 * 60 * 1000)
+  const thirtyDaysAgo = new Date(todayStart.getTime() - 30 * 24 * 60 * 60 * 1000)
+  const sixtyDaysAgo = new Date(todayStart.getTime() - 60 * 24 * 60 * 60 * 1000)
+
+  const [totalViews, todayViews, yesterdayViews, last30DaysViews, prev30DaysViews] = await Promise.all([
+    prisma.news.aggregate({
+      where: { status: NewsStatus.PUBLISHED },
+      _sum: { views: true },
+    }),
+    prisma.news.aggregate({
+      where: {
+        status: NewsStatus.PUBLISHED,
+        publishedAt: { gte: todayStart },
+      },
+      _sum: { views: true },
+    }),
+    prisma.news.aggregate({
+      where: {
+        status: NewsStatus.PUBLISHED,
+        publishedAt: { gte: yesterdayStart, lt: todayStart },
+      },
+      _sum: { views: true },
+    }),
+    prisma.news.aggregate({
+      where: {
+        status: NewsStatus.PUBLISHED,
+        publishedAt: { gte: thirtyDaysAgo },
+      },
+      _sum: { views: true },
+    }),
+    prisma.news.aggregate({
+      where: {
+        status: NewsStatus.PUBLISHED,
+        publishedAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+      },
+      _sum: { views: true },
+    }),
+  ])
+
+  const todayTotal = todayViews._sum.views ?? 0
+  const yesterdayTotal = yesterdayViews._sum.views ?? 0
+  const last30Total = last30DaysViews._sum.views ?? 0
+  const prev30Total = prev30DaysViews._sum.views ?? 0
+
+  const todayGrowth = yesterdayTotal > 0 ? ((todayTotal - yesterdayTotal) / yesterdayTotal) * 100 : 0
+  const monthlyGrowth = prev30Total > 0 ? ((last30Total - prev30Total) / prev30Total) * 100 : 0
+
+  return {
+    totalViews: totalViews._sum.views ?? 0,
+    todayViews: todayTotal,
+    todayGrowth: Math.round(todayGrowth * 10) / 10,
+    monthlyViews: last30Total,
+    monthlyGrowth: Math.round(monthlyGrowth * 10) / 10,
+  }
+}
+
+export async function getNewsViewsTrend(days: number = 10) {
+  const now = new Date()
+  const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days + 1)
+
+  const news = await prisma.news.findMany({
+    where: {
+      status: NewsStatus.PUBLISHED,
+      publishedAt: { gte: startDate },
+    },
+    select: {
+      views: true,
+      publishedAt: true,
+    },
+  })
+
+  const viewsByDate: Record<string, number> = {}
+  for (let i = 0; i < days; i++) {
+    const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000)
+    const key = `${date.getMonth() + 1}/${date.getDate()}`
+    viewsByDate[key] = 0
+  }
+
+  for (const item of news) {
+    if (item.publishedAt) {
+      const date = new Date(item.publishedAt)
+      const key = `${date.getMonth() + 1}/${date.getDate()}`
+      if (key in viewsByDate) {
+        viewsByDate[key] += item.views
+      }
+    }
+  }
+
+  return Object.entries(viewsByDate).map(([name, total]) => ({ name, total }))
+}
+
+export async function getTopViewedNews(limit: number = 5) {
+  const items = await prisma.news.findMany({
+    where: { status: NewsStatus.PUBLISHED },
+    orderBy: { views: 'desc' },
+    take: limit,
+    select: {
+      id: true,
+      title: true,
+      views: true,
+      publishedAt: true,
+      author: {
+        select: {
+          id: true,
+          username: true,
+          nickname: true,
+          avatar: true,
+        },
+      },
+    },
+  })
+
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    views: item.views,
+    publishedAt: item.publishedAt?.toISOString() ?? null,
+    author: item.author,
+  }))
+}

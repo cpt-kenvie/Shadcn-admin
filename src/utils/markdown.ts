@@ -23,13 +23,13 @@ function sanitizeUrl(rawUrl: string) {
 
 function renderInline(text: string) {
   const codeTokens: string[] = []
-  let escaped = escapeHtml(text)
-
-  escaped = escaped.replace(/`([^`]+)`/g, (_m, code: string) => {
+  let escaped = text.replace(/`([^`]+)`/g, (_m, code: string) => {
     const idx = codeTokens.length
-    codeTokens.push(code)
-    return `{{CODE_${idx}}}`
+    codeTokens.push(escapeHtml(code))
+    return `\x00CODE_${idx}\x00`
   })
+
+  escaped = escapeHtml(escaped)
 
   escaped = escaped.replace(
     /!\[([^\]]*)]\(([^)]+)\)/g,
@@ -57,7 +57,7 @@ function renderInline(text: string) {
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     .replace(/_([^_]+)_/g, '<em>$1</em>')
 
-  escaped = escaped.replace(/{{CODE_(\d+)}}/g, (_m, idx: string) => {
+  escaped = escaped.replace(/\x00CODE_(\d+)\x00/g, (_m, idx: string) => {
     const code = codeTokens[Number(idx)] ?? ''
     return `<code>${code}</code>`
   })
@@ -75,6 +75,7 @@ export function renderMarkdown(markdown: string) {
   let codeLines: string[] = []
   let inUl = false
   let inOl = false
+  let inBlockquote = false
 
   const closeLists = () => {
     if (inUl) {
@@ -87,6 +88,13 @@ export function renderMarkdown(markdown: string) {
     }
   }
 
+  const closeBlockquote = () => {
+    if (inBlockquote) {
+      parts.push('</blockquote>')
+      inBlockquote = false
+    }
+  }
+
   for (const rawLine of lines) {
     const line = rawLine.replace(/\s+$/, '')
 
@@ -94,6 +102,7 @@ export function renderMarkdown(markdown: string) {
     if (fenceMatch) {
       if (!inCodeBlock) {
         closeLists()
+        closeBlockquote()
         inCodeBlock = true
         codeLang = fenceMatch[1] || ''
         codeLines = []
@@ -114,8 +123,31 @@ export function renderMarkdown(markdown: string) {
 
     if (!line.trim()) {
       closeLists()
+      closeBlockquote()
       continue
     }
+
+    const hrMatch = line.match(/^\s{0,3}(-{3,}|\*{3,}|_{3,})\s*$/)
+    if (hrMatch) {
+      closeLists()
+      closeBlockquote()
+      parts.push('<hr />')
+      continue
+    }
+
+    const blockquote = line.match(/^\s{0,3}>\s?(.*)$/)
+    if (blockquote) {
+      closeLists()
+      if (!inBlockquote) {
+        parts.push('<blockquote>')
+        inBlockquote = true
+      }
+      const text = blockquote[1] || ''
+      parts.push(`<p>${renderInline(text)}</p>`)
+      continue
+    }
+
+    closeBlockquote()
 
     const heading = line.match(/^(#{1,6})\s+(.*)$/)
     if (heading) {
@@ -163,6 +195,7 @@ export function renderMarkdown(markdown: string) {
   }
 
   closeLists()
+  closeBlockquote()
   return parts.join('\n')
 }
 
