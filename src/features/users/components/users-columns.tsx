@@ -1,4 +1,4 @@
-import { ColumnDef } from '@tanstack/react-table'
+﻿import { ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -59,7 +59,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'nickname',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='昵称' />
+      <DataTableColumnHeader column={column} title='鏄电О' />
     ),
     cell: ({ row }) => {
       const nickname = row.original.nickname
@@ -70,7 +70,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'email',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='邮箱' />
+      <DataTableColumnHeader column={column} title='閭' />
     ),
     cell: ({ row }) => (
       <div className='w-fit text-nowrap'>{row.getValue('email')}</div>
@@ -79,7 +79,7 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'phoneNumber',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='电话号码' />
+      <DataTableColumnHeader column={column} title='鐢佃瘽鍙风爜' />
     ),
     cell: ({ row }) => <div>{row.getValue('phoneNumber')}</div>,
     enableSorting: false,
@@ -114,7 +114,6 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => {
       const { roles } = row.original
 
-      // 如果用户有多个角色，显示第一个角色，或者显示所有角色
       if (!roles || roles.length === 0) {
         return <span className='text-sm text-muted-foreground'>无角色</span>
       }
@@ -130,10 +129,9 @@ export const columns: ColumnDef<User>[] = [
         </div>
       )
     },
-    filterFn: (row, id, value) => {
-      // 根据角色 name 字段进行筛选
+    filterFn: (row, _id, value) => {
       const userRoles = row.original.roles || []
-      return userRoles.some(role => value.includes(role.name))
+      return userRoles.some((role) => value.includes(role.name))
     },
     enableSorting: false,
     enableHiding: false,
@@ -143,3 +141,4 @@ export const columns: ColumnDef<User>[] = [
     cell: DataTableRowActions,
   },
 ]
+

@@ -1,22 +1,33 @@
-/**
- * 任务页面入口：提供页头、主操作按钮、任务表格与相关对话框。
- * 使用 `TasksProvider` 管理对话框与当前行状态，数据来自静态 `tasks`。
- */
+﻿import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
-import { columns } from './components/columns'
-import { DataTable } from './components/data-table'
-import { TasksDialogs } from './components/tasks-dialogs'
-import { TasksPrimaryButtons } from './components/tasks-primary-buttons'
-import TasksProvider from './context/tasks-context'
-import { tasks } from './data/tasks'
+import { NewsPrimaryButtons } from './components/news-primary-buttons'
+import { NewsTable } from './components/news-table'
+import { newsColumns } from './components/news-columns'
+import { NewsMutateDrawer } from './components/news-mutate-drawer'
+import * as newsApi from '@/api/news'
+import type { NewsItem } from '@/api/news'
 
-export default function Tasks() {
+export default function News() {
+  const [createOpen, setCreateOpen] = useState(false)
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['news'],
+    queryFn: async () => {
+      const response = await newsApi.getNews({ page: 1, pageSize: 50 })
+      return response.data
+    },
+  })
+
+  const items: NewsItem[] = data?.data?.items || []
+  const total: number = data?.data?.total || 0
+
   return (
-    <TasksProvider>
+    <>
       <Header fixed>
         <Search />
         <div className='ml-auto flex items-center space-x-4'>
@@ -26,21 +37,30 @@ export default function Tasks() {
       </Header>
 
       <Main>
-        <div className='mb-2 flex flex-wrap items-center justify-between space-y-2 gap-x-4'>
+        <div className='mb-2 flex flex-wrap items-center justify-between space-y-2'>
           <div>
-            <h2 className='text-2xl font-bold tracking-tight'>任务</h2>
-            <p className='text-muted-foreground'>
-              这是你本月的任务列表！
-            </p>
+            <h2 className='text-2xl font-bold tracking-tight'>新闻管理</h2>
+            <p className='text-muted-foreground'>在这里维护新闻内容，共 {total} 条。</p>
           </div>
-          <TasksPrimaryButtons />
+          <NewsPrimaryButtons onCreate={() => setCreateOpen(true)} onRefresh={refetch} />
         </div>
+
         <div className='-mx-4 flex-1 overflow-auto px-4 py-1 lg:flex-row lg:space-y-0 lg:space-x-12'>
-          <DataTable data={tasks} columns={columns} />
+          {isLoading ? (
+            <div className='flex items-center justify-center py-8'>
+              <p>加载中...</p>
+            </div>
+          ) : error ? (
+            <div className='flex items-center justify-center py-8'>
+              <p className='text-destructive'>加载失败，请重试</p>
+            </div>
+          ) : (
+            <NewsTable data={items} columns={newsColumns} />
+          )}
         </div>
       </Main>
 
-      <TasksDialogs />
-    </TasksProvider>
+      <NewsMutateDrawer open={createOpen} onOpenChange={setCreateOpen} />
+    </>
   )
 }

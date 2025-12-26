@@ -18,6 +18,8 @@ import routeRoutes from './routes/routes.js'
 import menuRoutes from './routes/menus.js'
 import systemConfigRoutes from './routes/systemConfig.js'
 import userPreferenceRoutes from './routes/userPreference.js'
+import newsRoutes from './routes/news.js'
+import publicNewsRoutes from './routes/publicNews.js'
 
 // 验证环境变量
 try {
@@ -56,6 +58,8 @@ app.use('/api/routes', routeRoutes)
 app.use('/api/menus', menuRoutes)
 app.use('/api/system-config', systemConfigRoutes)
 app.use('/api/user-preference', userPreferenceRoutes)
+app.use('/api/news', newsRoutes)
+app.use('/api/public/news', publicNewsRoutes)
 
 // 404 处理
 app.use((req, res) => {

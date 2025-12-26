@@ -57,7 +57,7 @@ async function main() {
  * @returns {Promise<Permission[]>} 创建的权限列表
  */
 async function createPermissions() {
-  const resources = ['user', 'role', 'permission', 'route', 'dashboard', 'settings']
+  const resources = ['user', 'role', 'permission', 'route', 'news', 'dashboard', 'settings']
   const actions: PermissionAction[] = [
     'CREATE',
     'READ',
@@ -276,9 +276,10 @@ async function createRoutes(permissions: any[]) {
     { path: '/roles', name: 'roles', title: '角色管理', icon: 'IconUserShield', order: 2, resource: 'role' },
     { path: '/permissions', name: 'permissions', title: '权限管理', icon: 'IconLock', order: 3, resource: 'permission' },
     { path: '/routes', name: 'routes', title: '路由管理', icon: 'IconRoute', order: 4, resource: 'route' },
-    { path: '/tasks', name: 'tasks', title: '任务管理', icon: 'IconChecklist', order: 5, resource: 'dashboard' },
-    { path: '/chats', name: 'chats', title: '聊天', icon: 'IconMessages', order: 6, resource: 'dashboard' },
-    { path: '/apps', name: 'apps', title: '应用', icon: 'IconApps', order: 7, resource: 'dashboard' },
+    { path: '/news', name: 'news', title: '新闻管理', icon: 'IconFileText', order: 5, resource: 'news' },
+    { path: '/tasks', name: 'tasks', title: '任务管理', icon: 'IconChecklist', order: 6, resource: 'dashboard' },
+    { path: '/chats', name: 'chats', title: '聊天', icon: 'IconMessages', order: 7, resource: 'dashboard' },
+    { path: '/apps', name: 'apps', title: '应用', icon: 'IconApps', order: 8, resource: 'dashboard' },
   ]
 
   // 设置路由（带子路由）

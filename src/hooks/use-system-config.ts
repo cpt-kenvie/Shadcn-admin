@@ -1,7 +1,7 @@
-/**
- * 模块功能：系统配置Hook
- * 最后修改：2025-12-03
- * 依赖项：@tanstack/react-query, @/api/systemConfig
+﻿/**
+ * 妯″潡鍔熻兘锛氱郴缁熼厤缃瓾ook
+ * 鏈€鍚庝慨鏀癸細2025-12-03
+ * 渚濊禆椤癸細@tanstack/react-query, @/api/systemConfig
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -16,9 +16,9 @@ import {
 import { toast } from 'sonner'
 
 /**
- * @description 获取单个系统配置的Hook
- * @param {string} key - 配置键名
- * @returns {object} React Query结果对象
+ * @description 鑾峰彇鍗曚釜绯荤粺閰嶇疆鐨凥ook
+ * @param {string} key - 閰嶇疆閿悕
+ * @returns {object} React Query缁撴灉瀵硅薄
  */
 export function useSystemConfigByKey(key: string) {
   return useQuery({
@@ -29,9 +29,9 @@ export function useSystemConfigByKey(key: string) {
 }
 
 /**
- * @description 获取所有系统配置的Hook
- * @param {string} category - 可选的配置分类
- * @returns {object} React Query结果对象
+ * @description 鑾峰彇鎵€鏈夌郴缁熼厤缃殑Hook
+ * @param {string} category - 鍙€夌殑閰嶇疆鍒嗙被
+ * @returns {object} React Query缁撴灉瀵硅薄
  */
 export function useSystemConfigs(category?: string) {
   return useQuery({
@@ -41,13 +41,11 @@ export function useSystemConfigs(category?: string) {
 }
 
 /**
- * @description 获取系统配置的Hook（返回键值对对象）
- * @returns {object} 包含配置对象和加载状态
- */
+ * @description 鑾峰彇绯荤粺閰嶇疆鐨凥ook锛堣繑鍥為敭鍊煎瀵硅薄锛? * @returns {object} 鍖呭惈閰嶇疆瀵硅薄鍜屽姞杞界姸鎬? */
 export function useSystemConfig() {
   const { data, isLoading, error } = useSystemConfigs('appearance')
 
-  // 安全处理空数据和undefined情况
+  // 瀹夊叏澶勭悊绌烘暟鎹拰undefined鎯呭喌
   const configMap = data?.data && Array.isArray(data.data) && data.data.length > 0
     ? data.data.reduce(
         (acc, config) => {
@@ -68,61 +66,61 @@ export function useSystemConfig() {
 }
 
 /**
- * @description 设置系统配置的Mutation Hook
- * @returns {object} React Query Mutation对象
+ * @description 璁剧疆绯荤粺閰嶇疆鐨凪utation Hook
+ * @returns {object} React Query Mutation瀵硅薄
  */
 export function useSetSystemConfig() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (data: SystemConfigInput) => setSystemConfig(data),
-    onSuccess: (response, variables) => {
+    onSuccess: (_response, variables) => {
       queryClient.invalidateQueries({ queryKey: ['systemConfig', variables.key] })
       queryClient.invalidateQueries({ queryKey: ['systemConfigs'] })
-      toast.success(response.message || '配置已保存')
+      toast.success('配置已保存')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || '保存配置失败')
+      toast.error(error.response?.data?.message || '淇濆瓨閰嶇疆澶辫触')
     },
   })
 }
 
 /**
- * @description 批量设置系统配置的Mutation Hook
- * @returns {object} React Query Mutation对象
+ * @description 鎵归噺璁剧疆绯荤粺閰嶇疆鐨凪utation Hook
+ * @returns {object} React Query Mutation瀵硅薄
  */
 export function useSetSystemConfigs() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (data: SystemConfigInput[]) => setSystemConfigs(data),
-    onSuccess: (response) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['systemConfig'] })
       queryClient.invalidateQueries({ queryKey: ['systemConfigs'] })
-      toast.success(response.message || '配置已批量保存')
+      toast.success('配置已批量保存')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || '批量保存配置失败')
+      toast.error(error.response?.data?.message || '鎵归噺淇濆瓨閰嶇疆澶辫触')
     },
   })
 }
 
 /**
- * @description 删除系统配置的Mutation Hook
- * @returns {object} React Query Mutation对象
+ * @description 鍒犻櫎绯荤粺閰嶇疆鐨凪utation Hook
+ * @returns {object} React Query Mutation瀵硅薄
  */
 export function useDeleteSystemConfig() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (key: string) => deleteSystemConfig(key),
-    onSuccess: (response, key) => {
+    onSuccess: (_response, key) => {
       queryClient.invalidateQueries({ queryKey: ['systemConfig', key] })
       queryClient.invalidateQueries({ queryKey: ['systemConfigs'] })
-      toast.success(response.message || '配置已删除')
+      toast.success('配置已删除')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || '删除配置失败')
+      toast.error(error.response?.data?.message || '鍒犻櫎閰嶇疆澶辫触')
     },
   })
 }

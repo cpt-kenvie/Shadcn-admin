@@ -35,6 +35,8 @@ model User {
   // 关联
   userRoles     UserRole[]
   preferences   UserPreference?
+  news          News[]      @relation("NewsAuthor")
+  newsUpdates   News[]      @relation("NewsUpdatedBy")
 
   @@map("users")
   @@index([username])
@@ -206,4 +208,34 @@ model UserPreference {
 
   @@map("user_preferences")
   @@index([userId])
+}
+
+enum NewsStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model News {
+  id            String      @id @default(uuid())
+  title         String      @db.VarChar(200)
+  summary       String      @db.VarChar(500)
+  content       String      @db.Text
+  coverImageUrl String?     @map("cover_image_url") @db.VarChar(500)
+  status        NewsStatus  @default(DRAFT)
+  publishedAt   DateTime?   @map("published_at") @db.Timestamptz(6)
+  views         Int         @default(0)
+  authorId      String      @map("author_id")
+  updatedById   String?     @map("updated_by_id")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  author        User        @relation("NewsAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  updatedBy     User?       @relation("NewsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("news")
+  @@index([status])
+  @@index([publishedAt])
+  @@index([createdAt])
+  @@index([authorId])
 }

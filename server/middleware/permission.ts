@@ -9,7 +9,7 @@ import { AbilityBuilder, PureAbility, AbilityClass } from '@casl/ability'
 import { createForbiddenError } from '../utils/error.js'
 
 type Actions = 'CREATE' | 'READ' | 'UPDATE' | 'DELETE' | 'MANAGE' | 'IMPORT' | 'EXPORT'
-type Subjects = 'user' | 'role' | 'permission' | 'dashboard' | 'settings' | 'all'
+type Subjects = 'user' | 'role' | 'permission' | 'route' | 'dashboard' | 'settings' | 'news' | 'all'
 
 export type AppAbility = PureAbility<[Actions, Subjects]>
 

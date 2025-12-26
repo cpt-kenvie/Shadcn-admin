@@ -5,9 +5,32 @@
  */
 
 import dotenv from 'dotenv'
+import type { CorsOptions } from 'cors'
 
 // 加载环境变量
 dotenv.config()
+
+function parseCorsOrigins(value: string | undefined): string[] {
+  if (!value) return ['http://localhost:5173', 'http://localhost:8888']
+  return value
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean)
+}
+
+const allowedOrigins = new Set(parseCorsOrigins(process.env.CORS_ORIGIN))
+
+const cors: CorsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true)
+      return
+    }
+
+    callback(new Error(`Not allowed by CORS: ${origin}`))
+  },
+  credentials: true,
+}
 
 /**
  * @description 服务器配置
@@ -27,10 +50,7 @@ export const config = {
   },
 
   // CORS 配置
-  cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:8888',
-    credentials: true,
-  },
+  cors,
 
   // Cookie 配置
   cookie: {
