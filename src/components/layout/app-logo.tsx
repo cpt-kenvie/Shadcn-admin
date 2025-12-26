@@ -22,7 +22,7 @@ export function AppLogo({ logoUrl, className }: AppLogoProps) {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
 
-  const defaultLogo = 'https://img.keai.cool/2024/07/1/668a957f2a02f.png'
+  const defaultLogo = '/images/Logo.png'
   const displayLogo = logoUrl || defaultLogo
 
   return (

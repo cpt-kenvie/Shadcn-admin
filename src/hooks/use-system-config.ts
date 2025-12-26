@@ -60,7 +60,7 @@ export function useSystemConfig() {
 
   return {
     data: {
-      logoUrl: configMap.logoUrl || 'https://img.keai.cool/2024/07/1/668a957f2a02f.png',
+      logoUrl: configMap.logoUrl || '/images/Logo.png',
     },
     isLoading,
     error,

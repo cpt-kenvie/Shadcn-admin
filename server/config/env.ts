@@ -21,7 +21,7 @@ export const config = {
 
   // JWT 配置
   jwt: {
-    secret: process.env.JWT_SECRET || 'your-secret-key-change-this-in-production-123456',
+    secret: process.env.JWT_SECRET || 'S7865324.',
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
   },

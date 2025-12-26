@@ -18,6 +18,7 @@ const router = Router()
  * @access Public
  */
 router.post('/login', async (req, res, next) => {
+  console.log('登录请求体:', req.body)
   try {
     const result = await authService.login(req.body)
 
