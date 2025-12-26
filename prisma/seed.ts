@@ -7,7 +7,8 @@
 import { PrismaClient, PermissionAction, UserStatus } from '@prisma/client'
 import * as bcrypt from 'bcryptjs'
 import 'dotenv/config'
-
+import dotenv from 'dotenv'
+dotenv.config()
 const prisma = new PrismaClient({
   datasources: {
     db: {
