@@ -1,5 +1,11 @@
 import http from '@/utils/http'
 
+export interface ApiResponse<T> {
+  success: boolean
+  data: T
+  message?: string
+}
+
 export type NewsStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 
 export interface NewsAuthor {
@@ -94,15 +100,15 @@ export interface TopNewsItem {
 }
 
 export const getNewsStats = () => {
-  return http.get<NewsStats>('/news/stats')
+  return http.get<ApiResponse<NewsStats>>('/news/stats')
 }
 
 export const getNewsViewsTrend = (days?: number) => {
-  return http.get<ViewsTrendItem[]>('/news/stats/trend', { params: { days } })
+  return http.get<ApiResponse<ViewsTrendItem[]>>('/news/stats/trend', { params: { days } })
 }
 
 export const getTopViewedNews = (limit?: number) => {
-  return http.get<TopNewsItem[]>('/news/stats/top', { params: { limit } })
+  return http.get<ApiResponse<TopNewsItem[]>>('/news/stats/top', { params: { limit } })
 }
 
 export const getNewsTags = () => {

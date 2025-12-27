@@ -1,0 +1,18 @@
+services:
+  htec:
+    build:
+      context: ../..
+      dockerfile: admin/docker/Dockerfile
+    ports:
+      - "8888:80"
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    volumes:
+      - uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  uploads:

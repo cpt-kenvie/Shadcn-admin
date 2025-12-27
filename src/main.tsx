@@ -73,6 +73,7 @@ const router = createRouter({
   context: { queryClient },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
+  basepath: import.meta.env.BASE_URL,
 })
 
 // 启动时检查令牌；若未检测到令牌，则跳转到登录页并携带当前地址作为重定向参数
