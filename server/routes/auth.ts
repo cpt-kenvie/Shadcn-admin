@@ -104,4 +104,20 @@ router.post('/refresh', async (req, res, next) => {
   }
 })
 
+/**
+ * @route PUT /api/auth/password
+ * @description 修改密码
+ * @access Private
+ */
+router.put('/password', authenticate, async (req, res, next) => {
+  try {
+    await authService.changePassword(req.user!.userId, req.body)
+    res.clearCookie('token')
+    res.clearCookie('refreshToken')
+    sendSuccess(res, null, '密码修改成功')
+  } catch (error) {
+    next(error)
+  }
+})
+
 export default router

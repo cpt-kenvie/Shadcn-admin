@@ -2,6 +2,7 @@ import { Outlet } from '@tanstack/react-router'
 import {
   IconPalette,
   IconUser,
+  IconShield,
 } from '@tabler/icons-react'
 import { Separator } from '@/components/ui/separator'
 import { Header } from '@/components/layout/header'
@@ -51,6 +52,11 @@ const sidebarNavItems = [
     title: '个人资料',
     icon: <IconUser size={18} />,
     href: '/settings',
+  },
+  {
+    title: '安全设置',
+    icon: <IconShield size={18} />,
+    href: '/settings/security',
   },
   {
     title: '外观',

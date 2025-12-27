@@ -423,10 +423,15 @@ export async function incrementPublicNewsViews(id: string) {
     throw createNotFoundError('新闻不存在')
   }
 
-  const updated = await prisma.news.findUnique({
-    where: { id },
-    select: { views: true },
-  })
+  const [updated] = await Promise.all([
+    prisma.news.findUnique({
+      where: { id },
+      select: { views: true },
+    }),
+    prisma.newsView.create({
+      data: { newsId: id },
+    }),
+  ])
 
   return { views: updated!.views }
 }
@@ -443,40 +448,24 @@ export async function getNewsStats() {
       where: { status: NewsStatus.PUBLISHED },
       _sum: { views: true },
     }),
-    prisma.news.aggregate({
-      where: {
-        status: NewsStatus.PUBLISHED,
-        publishedAt: { gte: todayStart },
-      },
-      _sum: { views: true },
+    prisma.newsView.count({
+      where: { viewedAt: { gte: todayStart } },
     }),
-    prisma.news.aggregate({
-      where: {
-        status: NewsStatus.PUBLISHED,
-        publishedAt: { gte: yesterdayStart, lt: todayStart },
-      },
-      _sum: { views: true },
+    prisma.newsView.count({
+      where: { viewedAt: { gte: yesterdayStart, lt: todayStart } },
     }),
-    prisma.news.aggregate({
-      where: {
-        status: NewsStatus.PUBLISHED,
-        publishedAt: { gte: thirtyDaysAgo },
-      },
-      _sum: { views: true },
+    prisma.newsView.count({
+      where: { viewedAt: { gte: thirtyDaysAgo } },
     }),
-    prisma.news.aggregate({
-      where: {
-        status: NewsStatus.PUBLISHED,
-        publishedAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
-      },
-      _sum: { views: true },
+    prisma.newsView.count({
+      where: { viewedAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
     }),
   ])
 
-  const todayTotal = todayViews._sum.views ?? 0
-  const yesterdayTotal = yesterdayViews._sum.views ?? 0
-  const last30Total = last30DaysViews._sum.views ?? 0
-  const prev30Total = prev30DaysViews._sum.views ?? 0
+  const todayTotal = todayViews
+  const yesterdayTotal = yesterdayViews
+  const last30Total = last30DaysViews
+  const prev30Total = prev30DaysViews
 
   const todayGrowth = yesterdayTotal > 0 ? ((todayTotal - yesterdayTotal) / yesterdayTotal) * 100 : 0
   const monthlyGrowth = prev30Total > 0 ? ((last30Total - prev30Total) / prev30Total) * 100 : 0
@@ -494,15 +483,9 @@ export async function getNewsViewsTrend(days: number = 10) {
   const now = new Date()
   const startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days + 1)
 
-  const news = await prisma.news.findMany({
-    where: {
-      status: NewsStatus.PUBLISHED,
-      publishedAt: { gte: startDate },
-    },
-    select: {
-      views: true,
-      publishedAt: true,
-    },
+  const views = await prisma.newsView.findMany({
+    where: { viewedAt: { gte: startDate } },
+    select: { viewedAt: true },
   })
 
   const viewsByDate: Record<string, number> = {}
@@ -512,13 +495,11 @@ export async function getNewsViewsTrend(days: number = 10) {
     viewsByDate[key] = 0
   }
 
-  for (const item of news) {
-    if (item.publishedAt) {
-      const date = new Date(item.publishedAt)
-      const key = `${date.getMonth() + 1}/${date.getDate()}`
-      if (key in viewsByDate) {
-        viewsByDate[key] += item.views
-      }
+  for (const item of views) {
+    const date = new Date(item.viewedAt)
+    const key = `${date.getMonth() + 1}/${date.getDate()}`
+    if (key in viewsByDate) {
+      viewsByDate[key]++
     }
   }
 

@@ -289,6 +289,34 @@ export async function updateProfile(userId: string, data: UpdateProfileRequest) 
  * @returns {Promise<{token: string}>} 新的访问令牌
  * @throws {ApiError} 令牌无效时抛出
  */
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+export async function changePassword(userId: string, data: ChangePasswordRequest): Promise<void> {
+  const { currentPassword, newPassword } = data
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  })
+
+  if (!user) {
+    throw createValidationError('用户不存在')
+  }
+
+  const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash)
+  if (!isPasswordValid) {
+    throw createValidationError('当前密码错误')
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10)
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: hashedPassword },
+  })
+}
+
 export async function refreshAccessToken(refreshToken: string): Promise<{ token: string }> {
   try {
     const payload = JSON.parse(Buffer.from(refreshToken.split('.')[1], 'base64').toString())

@@ -82,3 +82,17 @@ export const refreshToken = (refreshToken: string) => {
 export const updateProfile = (data: UpdateProfileRequest) => {
   return http.put('/auth/profile', data)
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+/**
+ * @description 修改密码
+ * @param {ChangePasswordRequest} data 密码数据
+ * @returns {Promise} 响应
+ */
+export const changePassword = (data: ChangePasswordRequest) => {
+  return http.put('/auth/password', data)
+}

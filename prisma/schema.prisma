@@ -238,4 +238,18 @@ model News {
   @@index([publishedAt])
   @@index([createdAt])
   @@index([authorId])
+
+  newsViews NewsView[]
+}
+
+model NewsView {
+  id        String   @id @default(uuid())
+  newsId    String   @map("news_id")
+  viewedAt  DateTime @default(now()) @map("viewed_at") @db.Timestamptz(6)
+
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@map("news_views")
+  @@index([newsId])
+  @@index([viewedAt])
 }
