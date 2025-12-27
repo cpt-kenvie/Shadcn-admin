@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -16,13 +16,76 @@ import { Skeleton } from '@/components/ui/skeleton'
 import * as newsApi from '@/api/news'
 import type { CreateNewsRequest, UpdateNewsRequest } from '@/api/news'
 import { NewsForm, newsFormSchema, type NewsFormValues } from './components/news-form'
+import { ImageUploader } from './components/image-uploader'
+import type { Editor } from '@tiptap/react'
 
 const formId = 'news-upsert-form'
+
+type MarkdownStorage = {
+  markdown?: { getMarkdown?: () => string }
+}
+
+function getMarkdownFromEditor(editor: Editor) {
+  const storage = editor.storage as unknown as MarkdownStorage
+  return storage.markdown?.getMarkdown?.()
+}
 
 export default function NewsUpsert({ newsId }: { newsId?: string }) {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const isEdit = !!newsId
+  const editorRef = useRef<Editor | null>(null)
+  const lastSelectionRef = useRef<{ from: number; to: number } | null>(null)
+
+  const insertImageToEditor = (url: string) => {
+    const editor = editorRef.current
+    if (!editor || editor.isDestroyed) {
+      if (import.meta.env.DEV) {
+        console.info('[news:insertImage] editor missing/destroyed', { hasEditor: !!editor, isDestroyed: editor?.isDestroyed })
+      }
+      return false
+    }
+
+    const range = lastSelectionRef.current ?? { from: editor.state.selection.from, to: editor.state.selection.to }
+
+    const maxPos = editor.state.doc.content.size
+    const from = Math.max(0, Math.min(range.from, maxPos))
+    const to = Math.max(0, Math.min(range.to, maxPos))
+
+    if (import.meta.env.DEV) {
+      console.info('[news:insertImage] start', {
+        url,
+        editable: editor.isEditable,
+        from,
+        to,
+        currentSelection: { from: editor.state.selection.from, to: editor.state.selection.to },
+        lastSelection: lastSelectionRef.current,
+        canSetImage: editor.can().setImage({ src: url, alt: '' }),
+      })
+    }
+
+    const inserted = editor.chain().focus().setTextSelection({ from, to }).setImage({ src: url, alt: '' }).run()
+
+    if (import.meta.env.DEV) {
+      console.info('[news:insertImage] result', {
+        inserted,
+        selectionAfter: { from: editor.state.selection.from, to: editor.state.selection.to },
+        markdown: getMarkdownFromEditor(editor),
+      })
+    }
+    if (inserted) return true
+
+    editor.commands.focus('end')
+    const insertedAtEnd = editor.commands.setImage({ src: url, alt: '' })
+    if (import.meta.env.DEV) {
+      console.info('[news:insertImage] fallback(end)', {
+        insertedAtEnd,
+        selectionAfter: { from: editor.state.selection.from, to: editor.state.selection.to },
+        markdown: getMarkdownFromEditor(editor),
+      })
+    }
+    return insertedAtEnd
+  }
 
   const { data: tagsData } = useQuery({
     queryKey: ['news-tags'],
@@ -160,21 +223,62 @@ export default function NewsUpsert({ newsId }: { newsId?: string }) {
             </AlertDescription>
           </Alert>
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>内容</CardTitle>
-              <CardDescription>填写标题、摘要、状态与正文内容。</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <NewsForm
-                form={form}
-                formId={formId}
-                onSubmit={(values) => mutation.mutate(values)}
-                tagSuggestions={tagSuggestions}
-                className='space-y-6'
-              />
-            </CardContent>
-          </Card>
+          <div className='grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]'>
+            <Card>
+              <CardHeader>
+                <CardTitle>内容</CardTitle>
+                <CardDescription>填写标题、摘要、状态与正文内容。</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <NewsForm
+                  form={form}
+                  formId={formId}
+                  onSubmit={(values) => mutation.mutate(values)}
+                  tagSuggestions={tagSuggestions}
+                  className='space-y-6'
+                  newsId={newsId}
+                  onEditorReady={(editor) => {
+                    if (editorRef.current === editor) return
+                    editorRef.current = editor
+                    const syncSelection = () => {
+                      lastSelectionRef.current = { from: editor.state.selection.from, to: editor.state.selection.to }
+                    }
+
+                    syncSelection()
+                    editor.on('selectionUpdate', syncSelection)
+                    editor.on('transaction', syncSelection)
+                    editor.on('blur', syncSelection)
+                    editor.on('destroy', () => {
+                      if (editorRef.current === editor) {
+                        editorRef.current = null
+                        lastSelectionRef.current = null
+                      }
+                    })
+
+                    if (import.meta.env.DEV) {
+                      console.info('[news:editor] ready', { editable: editor.isEditable })
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+            <Card className='h-fit'>
+              <CardHeader>
+                <CardTitle>图片上传</CardTitle>
+                <CardDescription>点击图片插入到编辑器</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ImageUploader
+                  newsId={newsId}
+                  pickSuccessMessage='已插入图片'
+                  pickErrorMessage='插入失败'
+                  onPick={(url) => {
+                    return insertImageToEditor(url)
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
         )}
       </Main>
     </>

@@ -37,6 +37,7 @@ model User {
   preferences   UserPreference?
   news          News[]      @relation("NewsAuthor")
   newsUpdates   News[]      @relation("NewsUpdatedBy")
+  uploadFiles   UploadFile[]
 
   @@map("users")
   @@index([username])
@@ -253,4 +254,26 @@ model NewsView {
   @@map("news_views")
   @@index([newsId])
   @@index([viewedAt])
+}
+
+model UploadFile {
+  id          String   @id @default(uuid())
+  filename    String   @db.VarChar(255)
+  originalName String  @map("original_name") @db.VarChar(255)
+  mimeType    String   @map("mime_type") @db.VarChar(100)
+  size        Int
+  path        String   @db.VarChar(500)
+  url         String   @db.VarChar(500)
+  isUsed      Boolean  @default(false) @map("is_used")
+  newsId      String?  @map("news_id")
+  uploaderId  String   @map("uploader_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@map("upload_files")
+  @@index([newsId])
+  @@index([uploaderId])
+  @@index([isUsed])
 }

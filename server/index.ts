@@ -7,6 +7,7 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import path from 'path'
 import { config, validateEnv } from './config/env.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { disconnectDatabase } from './config/database.js'
@@ -20,6 +21,7 @@ import systemConfigRoutes from './routes/systemConfig.js'
 import userPreferenceRoutes from './routes/userPreference.js'
 import newsRoutes from './routes/news.js'
 import publicNewsRoutes from './routes/publicNews.js'
+import uploadRoutes from './routes/upload.js'
 
 // 验证环境变量
 try {
@@ -60,6 +62,8 @@ app.use('/api/system-config', systemConfigRoutes)
 app.use('/api/user-preference', userPreferenceRoutes)
 app.use('/api/news', newsRoutes)
 app.use('/api/public/news', publicNewsRoutes)
+app.use('/api/upload/files', express.static(path.resolve(process.cwd(), 'server/upload')))
+app.use('/api/upload', uploadRoutes)
 
 // 404 处理
 app.use((req, res) => {

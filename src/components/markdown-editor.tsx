@@ -1,13 +1,16 @@
 import { useEffect } from 'react'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
+import { BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Markdown } from 'tiptap-markdown'
+import { NodeSelection, Plugin, PluginKey } from '@tiptap/pm/state'
 import {
   Bold,
   Code,
+  Copy,
   Heading1,
   Heading2,
   Heading3,
@@ -16,9 +19,11 @@ import {
   Link2,
   List,
   ListOrdered,
+  Pencil,
   Quote,
   Redo,
   Strikethrough,
+  Trash2,
   Undo,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -33,6 +38,7 @@ export type MarkdownEditorProps = {
   containerClassName?: string
   disabled?: boolean
   placeholder?: string
+  onEditorReady?: (editor: Editor) => void
 }
 
 type MarkdownStorage = {
@@ -43,6 +49,25 @@ function getMarkdownFromEditor(editor: Editor) {
   const storage = editor.storage as unknown as MarkdownStorage
   return storage.markdown?.getMarkdown() ?? ''
 }
+
+const SelectableImage = Image.extend({
+  addProseMirrorPlugins() {
+    const parent = this.parent?.() ?? []
+    return [
+      ...parent,
+      new Plugin({
+        key: new PluginKey('image-click-select'),
+        props: {
+          handleClickOn: (view, _pos, node, nodePos) => {
+            if (node.type.name !== 'image') return false
+            view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, nodePos)))
+            return true
+          },
+        },
+      }),
+    ]
+  },
+})
 
 function ToolbarButton({
   label,
@@ -192,12 +217,13 @@ export function MarkdownEditor({
   containerClassName,
   disabled,
   placeholder = '输入内容...',
+  onEditorReady,
 }: MarkdownEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
       Link.configure({ openOnClick: false }),
-      Image,
+      SelectableImage.configure({ inline: true }),
       Placeholder.configure({ placeholder }),
       Markdown.configure({
         html: false,
@@ -213,6 +239,10 @@ export function MarkdownEditor({
   })
 
   useEffect(() => {
+    if (editor) onEditorReady?.(editor)
+  }, [editor, onEditorReady])
+
+  useEffect(() => {
     if (editor && value !== getMarkdownFromEditor(editor)) {
       editor.commands.setContent(value)
     }
@@ -221,6 +251,55 @@ export function MarkdownEditor({
   return (
     <div className={cn('rounded-md border bg-card', containerClassName)}>
       <EditorToolbar editor={editor} disabled={disabled} />
+      {editor && !disabled && (
+        <BubbleMenu
+          editor={editor}
+          shouldShow={() => editor.isEditable && editor.isActive('image')}
+        >
+          <div className='flex items-center gap-1 rounded-md border bg-popover p-1 shadow-sm'>
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon'
+              className='h-7 w-7'
+              onClick={() => {
+                const attrs = editor.getAttributes('image')
+                const current = typeof attrs.src === 'string' ? attrs.src : ''
+                const url = window.prompt('输入图片URL', current)
+                if (url) editor.chain().focus().updateAttributes('image', { src: url }).run()
+              }}
+              title='编辑图片链接'
+            >
+              <Pencil className='h-4 w-4' />
+            </Button>
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon'
+              className='h-7 w-7'
+              onClick={() => {
+                const attrs = editor.getAttributes('image')
+                const src = typeof attrs.src === 'string' ? attrs.src : ''
+                if (!src) return
+                navigator.clipboard?.writeText(src)
+              }}
+              title='复制图片链接'
+            >
+              <Copy className='h-4 w-4' />
+            </Button>
+            <Button
+              type='button'
+              variant='ghost'
+              size='icon'
+              className='h-7 w-7'
+              onClick={() => editor.chain().focus().deleteSelection().run()}
+              title='删除图片'
+            >
+              <Trash2 className='h-4 w-4' />
+            </Button>
+          </div>
+        </BubbleMenu>
+      )}
       <EditorContent
         editor={editor}
         className='p-4'

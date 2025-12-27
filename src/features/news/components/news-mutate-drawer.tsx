@@ -96,6 +96,7 @@ export function NewsMutateDrawer({
           formId={formId}
           onSubmit={(values) => mutation.mutate(values)}
           className='flex-1 space-y-5 overflow-auto px-1'
+          newsId={current?.id}
         />
 
         <SheetFooter className='gap-2'>

@@ -159,6 +159,7 @@ export default function NewsEdit({ newsId }: { newsId: string }) {
                 onSubmit={(values) => mutation.mutate(values)}
                 tagSuggestions={tagSuggestions}
                 className='space-y-6'
+                newsId={newsId}
               />
             </CardContent>
           </Card>
