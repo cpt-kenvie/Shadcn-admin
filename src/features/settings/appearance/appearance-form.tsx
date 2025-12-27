@@ -168,7 +168,7 @@ export function AppearanceForm() {
                 </FormControl>
                 <ChevronDownIcon className='absolute top-2.5 right-3 h-4 w-4 opacity-50' />
               </div>
-              <FormDescription className='font-manrope'>
+              <FormDescription>
                 设置你希望在仪表盘上使用的字体。
               </FormDescription>
               <FormMessage />
