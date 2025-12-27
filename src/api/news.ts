@@ -17,6 +17,7 @@ export interface NewsItem {
   coverImageUrl: string | null
   firstImageUrl: string | null
   heroImageUrl: string | null
+  tags: string[]
   status: NewsStatus
   publishedAt: string | null
   views: number
@@ -35,9 +36,10 @@ export interface GetNewsParams {
 
 export interface CreateNewsRequest {
   title: string
-  summary?: string
+  summary: string
   content: string
   coverImageUrl?: string | null
+  tags?: string[]
   status?: NewsStatus
 }
 
@@ -46,6 +48,7 @@ export interface UpdateNewsRequest {
   summary?: string
   content?: string
   coverImageUrl?: string | null
+  tags?: string[]
   status?: NewsStatus
 }
 
@@ -100,5 +103,9 @@ export const getNewsViewsTrend = (days?: number) => {
 
 export const getTopViewedNews = (limit?: number) => {
   return http.get<TopNewsItem[]>('/news/stats/top', { params: { limit } })
+}
+
+export const getNewsTags = () => {
+  return http.get<string[]>('/news/tags')
 }
 

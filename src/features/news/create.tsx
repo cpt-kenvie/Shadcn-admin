@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Header } from '@/components/layout/header'
@@ -21,12 +21,19 @@ export default function NewsCreate() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
 
+  const { data: tagsData } = useQuery({
+    queryKey: ['news-tags'],
+    queryFn: newsApi.getNewsTags,
+  })
+  const tagSuggestions = tagsData?.data ?? []
+
   const defaultValues = useMemo<NewsFormValues>(
     () => ({
       title: '',
       summary: '',
       status: 'DRAFT',
       coverImageUrl: '',
+      tags: [],
       content: '',
     }),
     []
@@ -46,13 +53,14 @@ export default function NewsCreate() {
         content: values.content,
         status: values.status,
         coverImageUrl: values.coverImageUrl?.trim() ? values.coverImageUrl.trim() : null,
+        tags: values.tags,
       }
       return newsApi.createNews(payload)
     },
     onSuccess: async () => {
       toast.success('创建成功')
       await queryClient.invalidateQueries({ queryKey: ['news'] })
-      navigate({ to: '/news' })
+      navigate({ to: '/news/list' })
     },
     onError: (error: any) => {
       const message = error?.response?.data?.message || '创建失败，请重试'
@@ -96,7 +104,7 @@ export default function NewsCreate() {
               form={form}
               formId={formId}
               onSubmit={(values) => mutation.mutate(values)}
-              contentRows={20}
+              tagSuggestions={tagSuggestions}
               className='space-y-6'
             />
           </CardContent>

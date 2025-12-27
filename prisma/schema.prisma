@@ -222,6 +222,7 @@ model News {
   summary       String      @db.VarChar(500)
   content       String      @db.Text
   coverImageUrl String?     @map("cover_image_url") @db.VarChar(500)
+  tags          String[]    @default([])
   status        NewsStatus  @default(DRAFT)
   publishedAt   DateTime?   @map("published_at") @db.Timestamptz(6)
   views         Int         @default(0)

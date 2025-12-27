@@ -36,6 +36,15 @@ router.get('/stats', requirePermission('READ', 'news'), async (req, res, next) =
   }
 })
 
+router.get('/tags', requirePermission('READ', 'news'), async (req, res, next) => {
+  try {
+    const tags = await newsService.getAllTags()
+    sendSuccess(res, tags, '获取标签列表成功')
+  } catch (error) {
+    next(error)
+  }
+})
+
 router.get('/stats/trend', requirePermission('READ', 'news'), async (req, res, next) => {
   try {
     const days = parsePositiveInt(req.query.days) ?? 10

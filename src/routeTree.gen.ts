@@ -38,6 +38,7 @@ import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authentica
 import { Route as AuthenticatedSettingsSecurityRouteImport } from './routes/_authenticated/settings/security'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedNewsNewRouteImport } from './routes/_authenticated/news/new'
+import { Route as AuthenticatedNewsListRouteImport } from './routes/_authenticated/news/list'
 import { Route as AuthenticatedNewsCreateRouteImport } from './routes/_authenticated/news/create'
 import { Route as AuthenticatedNewsNewsIdEditRouteImport } from './routes/_authenticated/news/$newsId/edit'
 
@@ -191,6 +192,11 @@ const AuthenticatedNewsNewRoute = AuthenticatedNewsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AuthenticatedNewsRoute,
 } as any)
+const AuthenticatedNewsListRoute = AuthenticatedNewsListRouteImport.update({
+  id: '/list',
+  path: '/list',
+  getParentRoute: () => AuthenticatedNewsRoute,
+} as any)
 const AuthenticatedNewsCreateRoute = AuthenticatedNewsCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof AuthenticatedTasksRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/news/create': typeof AuthenticatedNewsCreateRoute
+  '/news/list': typeof AuthenticatedNewsListRoute
   '/news/new': typeof AuthenticatedNewsNewRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/routes': typeof AuthenticatedRoutesRoute
   '/': typeof AuthenticatedIndexRoute
   '/news/create': typeof AuthenticatedNewsCreateRoute
+  '/news/list': typeof AuthenticatedNewsListRoute
   '/news/new': typeof AuthenticatedNewsNewRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/security': typeof AuthenticatedSettingsSecurityRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks': typeof AuthenticatedTasksRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/news/create': typeof AuthenticatedNewsCreateRoute
+  '/_authenticated/news/list': typeof AuthenticatedNewsListRoute
   '/_authenticated/news/new': typeof AuthenticatedNewsNewRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/security': typeof AuthenticatedSettingsSecurityRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/'
     | '/news/create'
+    | '/news/list'
     | '/news/new'
     | '/settings/appearance'
     | '/settings/security'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/routes'
     | '/'
     | '/news/create'
+    | '/news/list'
     | '/news/new'
     | '/settings/appearance'
     | '/settings/security'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks'
     | '/_authenticated/'
     | '/_authenticated/news/create'
+    | '/_authenticated/news/list'
     | '/_authenticated/news/new'
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/security'
@@ -617,6 +629,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedNewsNewRouteImport
       parentRoute: typeof AuthenticatedNewsRoute
     }
+    '/_authenticated/news/list': {
+      id: '/_authenticated/news/list'
+      path: '/list'
+      fullPath: '/news/list'
+      preLoaderRoute: typeof AuthenticatedNewsListRouteImport
+      parentRoute: typeof AuthenticatedNewsRoute
+    }
     '/_authenticated/news/create': {
       id: '/_authenticated/news/create'
       path: '/create'
@@ -654,12 +673,14 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 
 interface AuthenticatedNewsRouteChildren {
   AuthenticatedNewsCreateRoute: typeof AuthenticatedNewsCreateRoute
+  AuthenticatedNewsListRoute: typeof AuthenticatedNewsListRoute
   AuthenticatedNewsNewRoute: typeof AuthenticatedNewsNewRoute
   AuthenticatedNewsNewsIdEditRoute: typeof AuthenticatedNewsNewsIdEditRoute
 }
 
 const AuthenticatedNewsRouteChildren: AuthenticatedNewsRouteChildren = {
   AuthenticatedNewsCreateRoute: AuthenticatedNewsCreateRoute,
+  AuthenticatedNewsListRoute: AuthenticatedNewsListRoute,
   AuthenticatedNewsNewRoute: AuthenticatedNewsNewRoute,
   AuthenticatedNewsNewsIdEditRoute: AuthenticatedNewsNewsIdEditRoute,
 }

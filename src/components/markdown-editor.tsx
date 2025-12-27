@@ -1,4 +1,5 @@
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEffect } from 'react'
+import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
@@ -32,6 +33,15 @@ export type MarkdownEditorProps = {
   containerClassName?: string
   disabled?: boolean
   placeholder?: string
+}
+
+type MarkdownStorage = {
+  markdown?: { getMarkdown: () => string }
+}
+
+function getMarkdownFromEditor(editor: Editor) {
+  const storage = editor.storage as unknown as MarkdownStorage
+  return storage.markdown?.getMarkdown() ?? ''
 }
 
 function ToolbarButton({
@@ -198,9 +208,15 @@ export function MarkdownEditor({
     content: value,
     editable: !disabled,
     onUpdate: ({ editor }) => {
-      onValueChange(editor.storage.markdown.getMarkdown())
+      onValueChange(getMarkdownFromEditor(editor))
     },
   })
+
+  useEffect(() => {
+    if (editor && value !== getMarkdownFromEditor(editor)) {
+      editor.commands.setContent(value)
+    }
+  }, [editor, value])
 
   return (
     <div className={cn('rounded-md border bg-card', containerClassName)}>

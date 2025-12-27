@@ -1,7 +1,7 @@
-﻿/**
- * 妯″潡鍔熻兘锛氱郴缁熼厤缃瓾ook
- * 鏈€鍚庝慨鏀癸細2025-12-03
- * 渚濊禆椤癸細@tanstack/react-query, @/api/systemConfig
+/**
+ * 模块功能：系统配置Hook
+ * 最后修改：2025-12-03
+ * 依赖项：@tanstack/react-query, @/api/systemConfig
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -11,55 +11,64 @@ import {
   setSystemConfig,
   setSystemConfigs,
   deleteSystemConfig,
+  type SystemConfig,
   type SystemConfigInput,
 } from '@/api/systemConfig'
 import { toast } from 'sonner'
 
 /**
- * @description 鑾峰彇鍗曚釜绯荤粺閰嶇疆鐨凥ook
- * @param {string} key - 閰嶇疆閿悕
- * @returns {object} React Query缁撴灉瀵硅薄
+ * @description 获取单个系统配置的Hook
+ * @param {string} key - 配置键名
+ * @returns {object} React Query结果对象
  */
 export function useSystemConfigByKey(key: string) {
   return useQuery({
     queryKey: ['systemConfig', key],
-    queryFn: () => getSystemConfig(key),
+    queryFn: async () => {
+      const response = await getSystemConfig(key)
+      return response.data.data
+    },
     enabled: !!key,
   })
 }
 
 /**
- * @description 鑾峰彇鎵€鏈夌郴缁熼厤缃殑Hook
- * @param {string} category - 鍙€夌殑閰嶇疆鍒嗙被
- * @returns {object} React Query缁撴灉瀵硅薄
+ * @description 获取所有系统配置的Hook
+ * @param {string} category - 可选的配置分类
+ * @returns {object} React Query结果对象
  */
 export function useSystemConfigs(category?: string) {
   return useQuery({
     queryKey: ['systemConfigs', category],
-    queryFn: () => getAllSystemConfigs(category),
+    queryFn: async () => {
+      const response = await getAllSystemConfigs(category)
+      return response.data.data ?? []
+    },
   })
 }
 
 /**
- * @description 鑾峰彇绯荤粺閰嶇疆鐨凥ook锛堣繑鍥為敭鍊煎瀵硅薄锛? * @returns {object} 鍖呭惈閰嶇疆瀵硅薄鍜屽姞杞界姸鎬? */
+ * @description 获取系统配置的Hook（返回键值对对象）
+ * @returns {object} 包含配置对象和加载状态
+ */
 export function useSystemConfig() {
   const { data, isLoading, error } = useSystemConfigs('appearance')
 
-  // 瀹夊叏澶勭悊绌烘暟鎹拰undefined鎯呭喌
-  const configMap = data?.data && Array.isArray(data.data) && data.data.length > 0
-    ? data.data.reduce(
-        (acc, config) => {
-          acc[config.key] = config.value
-          return acc
-        },
-        {} as Record<string, string>
-      )
-    : {}
+  const configMap =
+    data && Array.isArray(data) && data.length > 0
+      ? data.reduce(
+          (acc, config: SystemConfig) => {
+            acc[config.key] = config.value
+            return acc
+          },
+          {} as Record<string, string>
+        )
+      : {}
 
   return {
     data: {
-      logoUrl: configMap.logoUrl || '/images/Logo.png',
-      darkLogoUrl: configMap.darkLogoUrl || '/images/white-Logo.webp',
+      logoUrl: configMap.logoUrl ?? '/images/logo-black3.png',
+      darkLogoUrl: configMap.darkLogoUrl ?? '/images/logo-white3.png',
     },
     isLoading,
     error,
@@ -67,8 +76,8 @@ export function useSystemConfig() {
 }
 
 /**
- * @description 璁剧疆绯荤粺閰嶇疆鐨凪utation Hook
- * @returns {object} React Query Mutation瀵硅薄
+ * @description 设置系统配置的Mutation Hook
+ * @returns {object} React Query Mutation对象
  */
 export function useSetSystemConfig() {
   const queryClient = useQueryClient()
@@ -81,14 +90,14 @@ export function useSetSystemConfig() {
       toast.success('配置已保存')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || '淇濆瓨閰嶇疆澶辫触')
+      toast.error(error.response?.data?.message || '保存配置失败')
     },
   })
 }
 
 /**
- * @description 鎵归噺璁剧疆绯荤粺閰嶇疆鐨凪utation Hook
- * @returns {object} React Query Mutation瀵硅薄
+ * @description 批量设置系统配置的Mutation Hook
+ * @returns {object} React Query Mutation对象
  */
 export function useSetSystemConfigs() {
   const queryClient = useQueryClient()
@@ -101,14 +110,14 @@ export function useSetSystemConfigs() {
       toast.success('配置已批量保存')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || '鎵归噺淇濆瓨閰嶇疆澶辫触')
+      toast.error(error.response?.data?.message || '批量保存配置失败')
     },
   })
 }
 
 /**
- * @description 鍒犻櫎绯荤粺閰嶇疆鐨凪utation Hook
- * @returns {object} React Query Mutation瀵硅薄
+ * @description 删除系统配置的Mutation Hook
+ * @returns {object} React Query Mutation对象
  */
 export function useDeleteSystemConfig() {
   const queryClient = useQueryClient()
@@ -121,7 +130,7 @@ export function useDeleteSystemConfig() {
       toast.success('配置已删除')
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || '鍒犻櫎閰嶇疆澶辫触')
+      toast.error(error.response?.data?.message || '删除配置失败')
     },
   })
 }

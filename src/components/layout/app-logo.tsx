@@ -24,11 +24,11 @@ export function AppLogo({ className }: AppLogoProps) {
   const { data: systemConfig } = useSystemConfig()
   const isCollapsed = state === 'collapsed'
 
-  const defaultLightLogo = '/images/Logo.png'
-  const defaultDarkLogo = '/images/white-Logo.webp'
+  const defaultLightLogo = '/images/logo-black2.png'
+  const defaultDarkLogo = '/images/logo-white2.png'
 
-  const lightLogo = systemConfig?.logoUrl || defaultLightLogo
-  const darkLogo = systemConfig?.darkLogoUrl || defaultDarkLogo
+  const lightLogo = systemConfig.logoUrl
+  const darkLogo = systemConfig.darkLogoUrl 
   const displayLogo = effectiveTheme === 'dark' ? darkLogo : lightLogo
 
   return (

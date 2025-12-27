@@ -83,19 +83,19 @@ export function AppearanceForm() {
       font: data.font,
     })
 
-    if (data.logoUrl && data.logoUrl !== systemConfig?.logoUrl) {
+    if (data.logoUrl !== systemConfig?.logoUrl) {
       setSystemConfigMutation.mutate({
         key: 'logoUrl',
-        value: data.logoUrl,
+        value: data.logoUrl || '',
         category: 'appearance',
         description: '浅色主题Logo地址',
       })
     }
 
-    if (data.darkLogoUrl && data.darkLogoUrl !== systemConfig?.darkLogoUrl) {
+    if (data.darkLogoUrl !== systemConfig?.darkLogoUrl) {
       setSystemConfigMutation.mutate({
         key: 'darkLogoUrl',
-        value: data.darkLogoUrl,
+        value: data.darkLogoUrl || '',
         category: 'appearance',
         description: '深色主题Logo地址',
       })
@@ -113,7 +113,7 @@ export function AppearanceForm() {
               <FormLabel>浅色主题Logo地址</FormLabel>
               <FormControl>
                 <Input
-                  placeholder='https://example.com/logo.png 或 /images/logo.png'
+                  placeholder='https://example.com/logo.png 或 /images/logo-black.png'
                   {...field}
                 />
               </FormControl>

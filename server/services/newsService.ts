@@ -7,6 +7,7 @@ export interface CreateNewsRequest {
   summary?: string
   content: string
   coverImageUrl?: string | null
+  tags?: string[]
   status?: NewsStatus
 }
 
@@ -15,6 +16,7 @@ export interface UpdateNewsRequest {
   summary?: string
   content?: string
   coverImageUrl?: string | null
+  tags?: string[]
   status?: NewsStatus
 }
 
@@ -42,6 +44,7 @@ function formatNewsBase(news: {
   summary: string
   content?: string
   coverImageUrl: string | null
+  tags: string[]
   status: NewsStatus
   publishedAt: Date | null
   views: number
@@ -61,6 +64,7 @@ function formatNewsBase(news: {
     coverImageUrl: news.coverImageUrl,
     firstImageUrl,
     heroImageUrl,
+    tags: news.tags,
     status: news.status,
     publishedAt: news.publishedAt?.toISOString() ?? null,
     views: news.views,
@@ -108,6 +112,7 @@ export async function getAdminNews(params: {
       summary: true,
       content: true,
       coverImageUrl: true,
+      tags: true,
       status: true,
       publishedAt: true,
       views: true,
@@ -150,6 +155,7 @@ export async function getAdminNewsById(id: string) {
       summary: true,
       content: true,
       coverImageUrl: true,
+      tags: true,
       status: true,
       publishedAt: true,
       views: true,
@@ -207,6 +213,7 @@ export async function createNews(authorId: string, data: CreateNewsRequest) {
       summary,
       content,
       coverImageUrl: data.coverImageUrl ?? null,
+      tags: data.tags ?? [],
       status,
       publishedAt,
       authorId,
@@ -218,6 +225,7 @@ export async function createNews(authorId: string, data: CreateNewsRequest) {
       summary: true,
       content: true,
       coverImageUrl: true,
+      tags: true,
       status: true,
       publishedAt: true,
       views: true,
@@ -286,6 +294,7 @@ export async function updateNews(id: string, updaterId: string, data: UpdateNews
       summary: nextSummary,
       content: nextContent,
       coverImageUrl: data.coverImageUrl === undefined ? undefined : data.coverImageUrl,
+      tags: data.tags,
       status: nextStatus,
       publishedAt,
       updatedById: updaterId,
@@ -296,6 +305,7 @@ export async function updateNews(id: string, updaterId: string, data: UpdateNews
       summary: true,
       content: true,
       coverImageUrl: true,
+      tags: true,
       status: true,
       publishedAt: true,
       views: true,
@@ -356,6 +366,7 @@ export async function getPublicNews(params: { page?: number; pageSize?: number }
       summary: true,
       content: true,
       coverImageUrl: true,
+      tags: true,
       status: true,
       publishedAt: true,
       views: true,
@@ -390,6 +401,7 @@ export async function getPublicNewsById(id: string) {
       summary: true,
       content: true,
       coverImageUrl: true,
+      tags: true,
       status: true,
       publishedAt: true,
       views: true,
@@ -534,4 +546,19 @@ export async function getTopViewedNews(limit: number = 5) {
     publishedAt: item.publishedAt?.toISOString() ?? null,
     author: item.author,
   }))
+}
+
+export async function getAllTags() {
+  const news = await prisma.news.findMany({
+    select: { tags: true },
+  })
+
+  const tagSet = new Set<string>()
+  for (const item of news) {
+    for (const tag of item.tags) {
+      tagSet.add(tag)
+    }
+  }
+
+  return Array.from(tagSet).sort()
 }

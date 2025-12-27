@@ -6,6 +6,13 @@
 
 import { prisma } from '../config/database.js'
 
+const VALID_FONTS = ['maple', 'system'] as const
+const DEFAULT_FONT = 'system'
+
+function normalizeFont(font: string): string {
+  return VALID_FONTS.includes(font as any) ? font : DEFAULT_FONT
+}
+
 /**
  * @description 获取用户偏好设置
  * @param {string} userId - 用户ID
@@ -24,13 +31,16 @@ export async function getUserPreference(userId: string) {
         data: {
           userId,
           theme: 'light',
-          font: 'manrope',
+          font: DEFAULT_FONT,
           language: 'zh-CN',
         },
       })
     }
 
-    return preference
+    return {
+      ...preference,
+      font: normalizeFont(preference.font),
+    }
   } catch (error) {
     console.error('获取用户偏好设置失败:', error)
     throw error
@@ -53,19 +63,26 @@ export async function updateUserPreference(
   }
 ) {
   try {
-    // 使用 upsert 确保记录存在
+    const normalizedData = {
+      ...data,
+      ...(data.font && { font: normalizeFont(data.font) }),
+    }
+
     const preference = await prisma.userPreference.upsert({
       where: { userId },
-      update: data,
+      update: normalizedData,
       create: {
         userId,
         theme: data.theme || 'light',
-        font: data.font || 'manrope',
+        font: normalizeFont(data.font || DEFAULT_FONT),
         language: data.language || 'zh-CN',
       },
     })
 
-    return preference
+    return {
+      ...preference,
+      font: normalizeFont(preference.font),
+    }
   } catch (error) {
     console.error('更新用户偏好设置失败:', error)
     throw error

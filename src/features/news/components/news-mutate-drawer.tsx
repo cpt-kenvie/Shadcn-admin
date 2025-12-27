@@ -31,6 +31,7 @@ export function NewsMutateDrawer({
         summary: current.summary,
         status: current.status,
         coverImageUrl: current.coverImageUrl || '',
+        tags: current.tags || [],
         content: current.content || '',
       }
     }
@@ -39,6 +40,7 @@ export function NewsMutateDrawer({
       summary: '',
       status: 'DRAFT',
       coverImageUrl: '',
+      tags: [],
       content: '',
     }
   }, [current])

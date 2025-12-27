@@ -6,6 +6,13 @@
 
 import http from '@/utils/http'
 
+export interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  message?: string
+  errors?: any[]
+}
+
 export interface SystemConfig {
   id: string
   key: string
@@ -30,7 +37,7 @@ export interface SystemConfigInput {
  * @throws {Error} 网络请求错误
  */
 export const getSystemConfig = (key: string) => {
-  return http.get<SystemConfig>(`/system-config/${key}`)
+  return http.get<ApiResponse<SystemConfig>>(`/system-config/${key}`)
 }
 
 /**
@@ -40,7 +47,7 @@ export const getSystemConfig = (key: string) => {
  * @throws {Error} 网络请求错误
  */
 export const getAllSystemConfigs = (category?: string) => {
-  return http.get<SystemConfig[]>('/system-config', {
+  return http.get<ApiResponse<SystemConfig[]>>('/system-config', {
     params: category ? { category } : undefined,
   })
 }
@@ -52,7 +59,7 @@ export const getAllSystemConfigs = (category?: string) => {
  * @throws {Error} 网络请求错误
  */
 export const setSystemConfig = (data: SystemConfigInput) => {
-  return http.post<SystemConfig>('/system-config', data)
+  return http.post<ApiResponse<SystemConfig>>('/system-config', data)
 }
 
 /**

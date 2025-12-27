@@ -24,6 +24,12 @@ export default function NewsUpsert({ newsId }: { newsId?: string }) {
   const navigate = useNavigate()
   const isEdit = !!newsId
 
+  const { data: tagsData } = useQuery({
+    queryKey: ['news-tags'],
+    queryFn: newsApi.getNewsTags,
+  })
+  const tagSuggestions = tagsData?.data ?? []
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['news', newsId],
     enabled: isEdit,
@@ -42,6 +48,7 @@ export default function NewsUpsert({ newsId }: { newsId?: string }) {
         summary: '',
         status: 'DRAFT',
         coverImageUrl: '',
+        tags: [],
         content: '',
       }
     }
@@ -50,6 +57,7 @@ export default function NewsUpsert({ newsId }: { newsId?: string }) {
       summary: current.summary,
       status: current.status,
       coverImageUrl: current.coverImageUrl || '',
+      tags: current.tags || [],
       content: current.content || '',
     }
   }, [current])
@@ -68,6 +76,7 @@ export default function NewsUpsert({ newsId }: { newsId?: string }) {
         content: values.content,
         status: values.status,
         coverImageUrl: values.coverImageUrl?.trim() ? values.coverImageUrl.trim() : null,
+        tags: values.tags,
       }
 
       if (isEdit) {
@@ -83,9 +92,8 @@ export default function NewsUpsert({ newsId }: { newsId?: string }) {
       await queryClient.invalidateQueries({ queryKey: ['news'] })
       if (isEdit) {
         await queryClient.invalidateQueries({ queryKey: ['news', newsId] })
-      } else {
-        navigate({ to: '/news' })
       }
+      navigate({ to: '/news/list' })
     },
     onError: (error: any) => {
       const message =
@@ -162,7 +170,7 @@ export default function NewsUpsert({ newsId }: { newsId?: string }) {
                 form={form}
                 formId={formId}
                 onSubmit={(values) => mutation.mutate(values)}
-                contentRows={20}
+                tagSuggestions={tagSuggestions}
                 className='space-y-6'
               />
             </CardContent>

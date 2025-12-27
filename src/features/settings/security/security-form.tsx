@@ -74,7 +74,7 @@ export default function SecurityForm() {
             <FormItem>
               <FormLabel>当前密码</FormLabel>
               <FormControl>
-                <Input type='password' placeholder='请输入当前密码' {...field} />
+                <Input type='password' placeholder='请输入当前密码' autoComplete='current-password' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -87,7 +87,7 @@ export default function SecurityForm() {
             <FormItem>
               <FormLabel>新密码</FormLabel>
               <FormControl>
-                <Input type='password' placeholder='请输入新密码' {...field} />
+                <Input type='password' placeholder='请输入新密码' autoComplete='new-password' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -100,7 +100,7 @@ export default function SecurityForm() {
             <FormItem>
               <FormLabel>确认新密码</FormLabel>
               <FormControl>
-                <Input type='password' placeholder='请再次输入新密码' {...field} />
+                <Input type='password' placeholder='请再次输入新密码' autoComplete='new-password' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
